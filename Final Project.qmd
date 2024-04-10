@@ -6,7 +6,7 @@ format:
     embed-resources: true
 ---
 
-goal: shiny app that compares caught, captured, and unmasked, for each character throughout the season (and color the graph based on that charcater's colors and maybe includes a table of the list of episodes for each character)
+goal: shiny app that compares caught, captured, and unmasked, for each character throughout the seasons (and color the graph based on that charcater's colors and maybe includes a table of the list of episodes for each character)
 - will be able to filter for several monster attributes and strategies(type, real, culprit gender, trapwork first, and if they split up)
 
 also compared the number of catchphrases (jeepers, jinkies, zoinks, and roobyroobyroo) for the seasons
@@ -177,15 +177,64 @@ snacks_df |> filter(series_name == "What's New Scooby-Doo?") |>
 catch phrases
 ```{r}
 catchphrase_df <- df |> select(1, 2, 32, 33, 34, 35) |>
-  pivot_longer(cols = (3:6), names_to = "catchphrase", values_to = "count") |>
-  filter(count != "NULL" & count != 0)
-  
+  pivot_longer(cols = (3:6), names_to = "catchphrase", values_to = "Count") |>
+  mutate(Count = as.factor(Count)) |>
+  mutate(Count = fct_recode(Count, "0" = "NULL")) |>
+  mutate(Count = as.numeric(as.character(Count))) 
+
+
 #Example graph for catchphrases in What's New Scooby-Doo
 catchphrase_df |> filter(series_name == "What's New Scooby-Doo?") |>
-  ggplot(aes(x = catchphrase)) +
-  geom_bar(position = "dodge", fill = c("#7c68ae", "#F8991D", "#B87333", "#b2bb1b")) +
+  group_by(catchphrase) |> summarise(count = sum(Count)) |>
+  ggplot(aes(x = catchphrase, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#F8991D", "#B87333", "#b2bb1b")) +
+  labs(title = "Catchphrase count for What's New Scooby Doo")
+
+catchphrase_df |> filter(series_name == "A Pup Named Scooby-Doo") |> group_by(catchphrase) |> summarise(count = sum(Count)) |>
+  ggplot(aes(x = catchphrase, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#F8991D", "#B87333", "#b2bb1b")) +
   labs(title = "Catchphrase count for What's New Scooby Doo")
 ```
 
 For in class tomorrow:
 - start making app (start with catchphrases first)
+```{r}
+library(shiny)
+
+
+series_vec <- catchphrase_df |> 
+  mutate(series_name = factor(series_name)) |> 
+  pull(series_name) |> 
+  levels()
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("series_select", label = "Choose a Scooby-Doo Series", 
+                  choices = series_vec)
+    ),
+    mainPanel(
+      plotOutput("barplot")
+    )
+  )
+)
+
+server <- function(input, output, session){
+  output$barplot <- renderPlot({
+    catchphrase_df |> filter(series_name == input$series_select) |>
+      group_by(catchphrase) |> summarise(count = sum(Count)) |>
+      ggplot(aes(x = catchphrase, y = count)) +
+      geom_col(position = "dodge", fill = c("#7c68ae", "#F8991D", "#B87333", "#b2bb1b")) +
+      theme_minimal() +
+      labs(title = glue::glue("Catchphrase count for ", input$series_select))
+  })
+}
+
+shinyApp(ui, server)
+```
+
+
+To do for homework:
+-finish fixing catchphrase Count variable so that it graphs for all of them (changing NULLs to 0s)
+-for other variables, manually make a count, need to change NULLs to 0
+-finish adding catchphrase to Shiny app including a table of the counts

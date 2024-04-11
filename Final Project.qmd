@@ -8,7 +8,6 @@ format:
 
 goal: shiny app that compares caught, captured, and unmasked, for each character throughout the seasons (and color the graph based on that charcater's colors and maybe includes a table of the list of episodes for each character)
 - will be able to filter for several monster attributes and strategies(type, real, culprit gender, trapwork first, and if they split up)
-
 also compared the number of catchphrases (jeepers, jinkies, zoinks, and roobyroobyroo) for the seasons
 
 ```{r}
@@ -144,34 +143,40 @@ snacks_df <- df |> select(1, 2, 20:24) |>
   mutate(snack_fred = as.factor(snack_fred)) |>
   mutate(snack_fred = if_else(snack_fred == "TRUE",
                                true = "Fred",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(snack_daphnie = as.factor(snack_daphnie)) |>
   mutate(snack_daphnie = if_else(snack_daphnie == "TRUE",
                                true = "Daphnie",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(snack_velma = as.factor(snack_velma)) |>
   mutate(snack_velma = if_else(snack_velma == "TRUE",
                                true = "Velma",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(snack_shaggy = as.factor(snack_shaggy)) |>
   mutate(snack_shaggy = if_else(snack_shaggy == "TRUE",
                                true = "Shaggy",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(snack_scooby = as.factor(snack_scooby)) |>
   mutate(snack_scooby = if_else(snack_scooby == "TRUE",
                                true = "Scooby",
-                               false = "No")) |>
+                               false = "0")) |>
   pivot_longer(cols = (3:7), names_to = "who", values_to = "snacks") |>
-  group_by(series_name, title, snacks) |>
-  summarise(count = n()) |>
-  filter(snacks != "No")
+  separate(col = who, into = c("snack", "who"), sep = "_") |>
+  mutate(snacks = if_else(snacks!=0, 1, 0))
 
 #Example graph: count of each character snack in What's New Scooby-Doo
 snacks_df |> filter(series_name == "What's New Scooby-Doo?") |>
-  ggplot(aes(x = snacks)) +
-  geom_bar(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+  group_by(who) |> summarise(count = sum(snacks)) |>
+  ggplot(aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
                                         "#B87333","#b2bb1b", "#F8991D")) +
   labs(title = "Snack count by character for What's New Scooby Doo")
+
+snacks_df |> filter(series_name == "A Pup Named Scooby-Doo") |>
+  group_by(who) |> summarise(count = sum(snacks)) |>
+  ggplot(aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                        "#B87333","#b2bb1b", "#F8991D"))
 ```
 
 catch phrases
@@ -196,8 +201,7 @@ catchphrase_df |> filter(series_name == "A Pup Named Scooby-Doo") |> group_by(ca
   labs(title = "Catchphrase count for What's New Scooby Doo")
 ```
 
-For in class tomorrow:
-- start making app (start with catchphrases first)
+App
 ```{r}
 library(shiny)
 
@@ -211,30 +215,57 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       selectInput("series_select", label = "Choose a Scooby-Doo Series", 
-                  choices = series_vec)
+                  choices = series_vec),
+      selectInput("var_select", label = "Choose a variable", 
+                  choices = c("Captured", "Catchphrase", "Caught",
+                              "Snacks", "Unmasked"))
     ),
     mainPanel(
-      plotOutput("barplot")
+      plotOutput("barplot"),
+      dataTableOutput("table")
     )
   )
 )
 
 server <- function(input, output, session){
+  
+  
   output$barplot <- renderPlot({
-    catchphrase_df |> filter(series_name == input$series_select) |>
+    if(input$var_select == "Catchphrase"){
+      catchphrase_df |> filter(series_name == input$series_select) |>
       group_by(catchphrase) |> summarise(count = sum(Count)) |>
       ggplot(aes(x = catchphrase, y = count)) +
       geom_col(position = "dodge", fill = c("#7c68ae", "#F8991D", "#B87333", "#b2bb1b")) +
       theme_minimal() +
       labs(title = glue::glue("Catchphrase count for ", input$series_select))
+    }
+    if(input$var_select == "Snacks"){
+      snacks_df |> filter(series_name == input$series_select) |>
+        group_by(who) |> summarise(count = sum(snacks)) |>
+        ggplot(aes(x = who, y = count)) +
+        geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                              "#B87333","#b2bb1b", "#F8991D")) +
+        labs(title = "Snack count by character for ", input$series_select)
+    }
+  })
+
+  output$table <- renderDataTable({
+    if(input$var_select == "Catchphrase"){
+      catchphrase_df |> filter(series_name == input$series_select) |>
+      group_by(catchphrase) |> summarise(count = sum(Count))
+    }
+    if(input$var_select == "Snacks"){
+      snacks_df |> filter(series_name == input$series_select) |>
+        group_by(who) |> summarise(count = sum(snacks))
+    }
   })
 }
 
 shinyApp(ui, server)
 ```
 
-
-To do for homework:
--finish fixing catchphrase Count variable so that it graphs for all of them (changing NULLs to 0s)
--for other variables, manually make a count, need to change NULLs to 0
--finish adding catchphrase to Shiny app including a table of the counts
+Next class session:
+-for the remaining variables, make sure that all 5 people are shown even if they have 0 like in snacks
+-add the remaining variables to the shiny app(captured, caught, and unmasked)
+- make x and y axis titles better for each graph and theme minimal
+-start filtering by monster attributes??

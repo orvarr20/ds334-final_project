@@ -7,7 +7,7 @@ format:
 ---
 
 goal: shiny app that compares caught, captured, and unmasked, for each character throughout the seasons (and color the graph based on that charcater's colors and maybe includes a table of the list of episodes for each character)
-- will be able to filter for several monster attributes and strategies(type, real, culprit gender, trapwork first, and if they split up)
+- will be able to filter for several monster attributes and strategies(type, real, culprit gender, trap work first, and if they split up)
 also compared the number of catchphrases (jeepers, jinkies, zoinks, and roobyroobyroo) for the seasons
 
 ```{r}
@@ -26,40 +26,40 @@ caught_df <- df |> select(1, 2, 5, 6, 7,8 , 9, 26, 27) |>
   mutate(caught_fred = as.factor(caught_fred)) |>
   mutate(caught_fred = if_else(caught_fred == "TRUE",
                                true = "Fred",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(caught_daphnie = as.factor(caught_daphnie)) |>
   mutate(caught_daphnie = if_else(caught_daphnie == "TRUE",
                                true = "Daphnie",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(caught_velma = as.factor(caught_velma)) |>
   mutate(caught_velma = if_else(caught_velma == "TRUE",
                                true = "Velma",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(caught_shaggy = as.factor(caught_shaggy)) |>
   mutate(caught_shaggy = if_else(caught_shaggy == "TRUE",
                                true = "Shaggy",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(caught_scooby = as.factor(caught_scooby)) |>
   mutate(caught_scooby = if_else(caught_scooby == "TRUE",
                                true = "Scooby",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(caught_other = as.factor(caught_other)) |>
   mutate(caught_other = if_else(caught_other == "TRUE",
                                true = "Other",
-                               false = "No")) |> 
+                               false = "0")) |> 
   mutate(caught_not = as.factor(caught_not)) |>
   mutate(caught_not = if_else(caught_not == "TRUE",
                                true = "Not Caught",
-                               false = "No")) |>
+                               false = "0")) |>
   pivot_longer(cols = (3:9), names_to = "who", values_to = "caught_by") |>
-  group_by(series_name, title, caught_by) |>
-  summarise(count = n()) |>
-  filter(caught_by != "No")
+  separate(col = who, into = c("caught", "who"), sep = "_") |>
+  mutate(caught_by = if_else(caught_by!=0, 1, 0))
 
 #Example graph: count of each character captured in What's New Scooby-Doo
 caught_df |> filter(series_name == "What's New Scooby-Doo?") |>
-  ggplot(aes(x = caught_by)) +
-  geom_bar(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black",
+  group_by(who) |> summarise(count = sum(caught_by)) |>
+  ggplot(aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black", "red",
                                         "#B87333","#b2bb1b", "#F8991D")) +
   labs(title = "Caught count by character for What's New Scooby Doo")
 ```
@@ -69,32 +69,32 @@ captured_df <- df |> select(1, 2, 10:14) |>
   mutate(captured_fred = as.factor(captured_fred)) |>
   mutate(captured_fred = if_else(captured_fred == "TRUE",
                                true = "Fred",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(captured_daphnie = as.factor(captured_daphnie)) |>
   mutate(captured_daphnie = if_else(captured_daphnie == "TRUE",
                                true = "Daphnie",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(captured_velma = as.factor(captured_velma)) |>
   mutate(captured_velma = if_else(captured_velma == "TRUE",
                                true = "Velma",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(captured_shaggy = as.factor(captured_shaggy)) |>
   mutate(captured_shaggy = if_else(captured_shaggy == "TRUE",
                                true = "Shaggy",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(captured_scooby = as.factor(captured_scooby)) |>
   mutate(captured_scooby = if_else(captured_scooby == "TRUE",
                                true = "Scooby",
-                               false = "No")) |>
-  pivot_longer(cols = (3:7), names_to = "who", values_to = "captured") |>
-  group_by(series_name, title, captured) |>
-  summarise(count = n()) |>
-  filter(captured != "No")
+                               false = "0")) |>
+  pivot_longer(cols = (3:7), names_to = "who", values_to = "captured_by") |>
+  separate(col = who, into = c("captured", "who"), sep = "_") |>
+  mutate(captured_by = if_else(captured_by!=0, 1, 0))
 
 ##example graph for captured count
 captured_df |> filter(series_name == "What's New Scooby-Doo?") |>
-  ggplot(aes(x = captured)) +
-  geom_bar(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+  group_by(who) |> summarise(count = sum(captured_by)) |>
+  ggplot(aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
                                         "#B87333","#b2bb1b", "#F8991D")) +
   labs(title = "Captured count by character for What's New Scooby Doo")
 ```
@@ -104,37 +104,37 @@ unmasked_df <- df |> select(1, 2, 15:19, 25) |>
   mutate(unmask_fred = as.factor(unmask_fred)) |>
   mutate(unmask_fred = if_else(unmask_fred == "TRUE",
                                true = "Fred",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(unmask_daphnie = as.factor(unmask_daphnie)) |>
   mutate(unmask_daphnie = if_else(unmask_daphnie == "TRUE",
                                true = "Daphnie",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(unmask_velma = as.factor(unmask_velma)) |>
   mutate(unmask_velma = if_else(unmask_velma == "TRUE",
                                true = "Velma",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(unmask_shaggy = as.factor(unmask_shaggy)) |>
   mutate(unmask_shaggy = if_else(unmask_shaggy == "TRUE",
                                true = "Shaggy",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(unmask_scooby = as.factor(unmask_scooby)) |>
   mutate(unmask_scooby = if_else(unmask_scooby == "TRUE",
                                true = "Scooby",
-                               false = "No")) |>
+                               false = "0")) |>
   mutate(unmask_other = as.factor(unmask_other)) |>
   mutate(unmask_other = if_else(unmask_other == "TRUE",
                                true = "Other",
-                               false = "No")) |>
-  pivot_longer(cols = (3:8), names_to = "who", values_to = "unmasked_by") |>
-  group_by(series_name, title, unmasked_by) |>
-  summarise(count = n()) |>
-  filter(unmasked_by != "No")
+                               false = "0")) |>
+  pivot_longer(cols = (3:8), names_to = "who", values_to = "unmasked") |>
+  separate(col = who, into = c("unmasked_by", "who"), sep = "_") |>
+  mutate(unmasked = if_else(unmasked!=0, 1, 0))
 
 #Example graph for unmasked count
 unmasked_df |> filter(series_name == "What's New Scooby-Doo?") |>
-  ggplot(aes(x = unmasked_by)) +
-  geom_bar(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black",
-                                        "#B87333", "#F8991D")) +
+  group_by(who) |> summarise(count = sum(unmasked)) |>
+  ggplot(aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black",
+                                        "#B87333", "#b2bb1b","#F8991D")) +
   labs(title = "Unmasked count by character for What's New Scooby Doo")
 ```
 snack
@@ -218,7 +218,13 @@ ui <- fluidPage(
                   choices = series_vec),
       selectInput("var_select", label = "Choose a variable", 
                   choices = c("Captured", "Catchphrase", "Caught",
-                              "Snacks", "Unmasked"))
+                              "Snacks", "Unmasked")),
+      selectizeInput("filtering_var", label = "Choose a Variable to Filter By",
+                     choices = c("none", "monster_type", "monster_amount",
+                                 "monster_real","trap_work_first", "culprit_gender",
+                                 "split_up","number_of_snacks"), 
+                     selected = "none",
+                     multiple = TRUE)
     ),
     mainPanel(
       plotOutput("barplot"),
@@ -229,34 +235,105 @@ ui <- fluidPage(
 
 server <- function(input, output, session){
   
-  
   output$barplot <- renderPlot({
-    if(input$var_select == "Catchphrase"){
-      catchphrase_df |> filter(series_name == input$series_select) |>
-      group_by(catchphrase) |> summarise(count = sum(Count)) |>
-      ggplot(aes(x = catchphrase, y = count)) +
-      geom_col(position = "dodge", fill = c("#7c68ae", "#F8991D", "#B87333", "#b2bb1b")) +
-      theme_minimal() +
-      labs(title = glue::glue("Catchphrase count for ", input$series_select))
-    }
-    if(input$var_select == "Snacks"){
-      snacks_df |> filter(series_name == input$series_select) |>
-        group_by(who) |> summarise(count = sum(snacks)) |>
+    if(input$var_select == "Captured"){
+      captured_df |> filter(series_name == input$series_select) |>
+        group_by(who) |> summarise(count = sum(captured_by)) |>
         ggplot(aes(x = who, y = count)) +
         geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
                                               "#B87333","#b2bb1b", "#F8991D")) +
-        labs(title = "Snack count by character for ", input$series_select)
+        labs(x = "Character", y = "Captured Count", 
+             title = glue::glue("Captured count by character for ",
+                                input$series_select)) +
+        theme_minimal()
+    }
+    else{
+      if(input$var_select == "Catchphrase"){
+        catchphrase_df |> filter(series_name == input$series_select) |>
+          group_by(catchphrase) |> summarise(count = sum(Count)) |>
+          ggplot(aes(x = catchphrase, y = count)) +
+          geom_col(position = "dodge", fill = c("#7c68ae", "#F8991D",
+                                                "#B87333", "#b2bb1b")) +
+          theme_minimal() +
+          labs(x = "Catchphrase", y = "Count", 
+               title = glue::glue("Catchphrase count for ", input$series_select)) +
+          theme_minimal()
+      }
+      else{
+        if(input$var_select == "Caught"){
+          caught_df |> filter(series_name == input$series_select) |>
+            group_by(who) |> summarise(count = sum(caught_by)) |>
+            ggplot(aes(x = who, y = count)) +
+            geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black", "red",
+                                                  "#B87333","#b2bb1b", "#F8991D")) +
+            labs(x = "Character", y = "Caught Count", 
+                 title = glue::glue("Caught count by character for ", 
+                                    input$series_select)) +
+            theme_minimal()
+        }
+        else{
+          if(input$var_select == "Snacks"){
+            snacks_df |> filter(series_name == input$series_select) |>
+              group_by(who) |> summarise(count = sum(snacks)) |>
+              ggplot(aes(x = who, y = count)) +
+              geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                                    "#B87333","#b2bb1b", "#F8991D")) +
+              labs(x = "Character", y = "Snack Count", 
+                   title = glue::glue("Snack count by character for ", 
+                                      input$series_select)) +
+              theme_minimal()
+          }
+          else{
+            if(input$var_select == "Unmasked"){
+              unmasked_df |> filter(series_name == input$series_select) |>
+                group_by(who) |> summarise(count = sum(unmasked)) |>
+                ggplot(aes(x = who, y = count)) +
+                geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black",
+                                                      "#B87333", "#b2bb1b","#F8991D")) +
+                labs(x = "Character", y = "Unmasked Count", 
+                     title = glue::glue("Unmasked count by character for ",
+                                        input$series_select)) +
+                theme_minimal()
+            }
+          }
+        }
+      }
     }
   })
 
   output$table <- renderDataTable({
-    if(input$var_select == "Catchphrase"){
-      catchphrase_df |> filter(series_name == input$series_select) |>
-      group_by(catchphrase) |> summarise(count = sum(Count))
+    if(input$var_select == "Captured"){
+      captured_df |> filter(series_name == input$series_select) |>
+        mutate(Character = who) |> group_by(Character) |> 
+        summarise("Captured Count" = sum(captured_by))
     }
-    if(input$var_select == "Snacks"){
-      snacks_df |> filter(series_name == input$series_select) |>
-        group_by(who) |> summarise(count = sum(snacks))
+    else{
+      if(input$var_select == "Catchphrase"){
+      catchphrase_df |> filter(series_name == input$series_select) |>
+          mutate(Catchphrase = catchphrase) |> group_by(Catchphrase) |>
+          summarise("Catchphrase Count" = sum(Count))
+      }
+      else{
+        if(input$var_select == "Caught"){
+          caught_df |> filter(series_name == input$series_select) |>
+            mutate(Character = who) |> group_by(Character) |> 
+            summarise("Caught Count" = sum(caught_by))
+        }
+        else{
+          if(input$var_select == "Snacks"){
+            snacks_df |> filter(series_name == input$series_select) |>
+              mutate(Character = who) |> group_by(Character) |> 
+              summarise("Snack Count" = sum(snacks))
+          }
+          else{
+            if(input$var_select == "Unmasked"){
+              unmasked_df |> filter(series_name == input$series_select) |>
+                mutate(Character = who) |> group_by(Character) |> 
+                summarise("Unmasked Count" = sum(unmasked))
+            }
+          }
+        }
+      }
     }
   })
 }
@@ -264,8 +341,32 @@ server <- function(input, output, session){
 shinyApp(ui, server)
 ```
 
-Next class session:
--for the remaining variables, make sure that all 5 people are shown even if they have 0 like in snacks
--add the remaining variables to the shiny app(captured, caught, and unmasked)
-- make x and y axis titles better for each graph and theme minimal
--start filtering by monster attributes??
+Homework:
+-make tables and graphs for final write up(look at all shiny variables but without filtering for season to see who unmasks, snacks, etc. the most)
+-once monster variable is chosen, another thing pops up with the sub options for that variable (the levels)
+-start filtering by monster attributes
+
+```{r}
+df |> group_by(monster_type) |> summarise(count = n()) |> print(n = 133)
+
+#ancient, animal, disguised, Extraterrestrial, Ghost, Magician, Mechanical, Mythical, NULL, Plant, Possessed Object, Super-Villain, Undead --> need to recode so there are only these basics OR MAKE A MONSTER COUNT??
+#THERE IS A MONSTER_AMOUNT VARIABLE IN SCOOBYDOO DATASET
+scoobydoo |> group_by(monster_amount) |> summarise(count = n())
+
+df |> group_by(monster_real) |> summarise(count = n())
+#levels: TRUE, FALSE, and NULL
+
+df |> group_by(trap_work_first) |> summarise(count = n())
+#levels: TRUE, FALSE, NULL, and NA
+
+df |> group_by(culprit_gender) |> summarise(count = n()) |> print(n = 24)
+# need to either make make it so it's only Male, Female, and NULL or make a culprit count list or both
+
+df |> group_by(split_up) |> summarise(count = n())
+#levels: 0, 1 , 2, and NULL (idk what 1 and 2 are for and it doesn't say on the data github)
+
+df |> group_by(number_of_snacks) |> summarise(count = n())
+# different numbers of snacks, number of boxes, "a couple", NULL, lifetime supply, several, several boxes, truckload, and wheel barrel full
+
+## also will need a no filter one for different attributes/strategies
+```

@@ -13,9 +13,141 @@ also compared the number of catchphrases (jeepers, jinkies, zoinks, and roobyroo
 ```{r}
 library(tidyverse)
 scoobydoo <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-13/scoobydoo.csv')
-df <- scoobydoo |> select(2, 5, 13, 16, 18:41, 48, 54, 55, 58, 59, 62, 65)
-##take out season
-df 
+df <- scoobydoo |> select(2, 5, 13, 16, 18:41, 48, 54, 55, 58, 59, 62, 65, 17)
+df <- df |> mutate(split_up = fct_recode(split_up, No = "0", Yes = "1", Yes = "2")) |>
+  mutate(trap_work_first = if_else(is.na(trap_work_first),                    
+                                       "NULL", trap_work_first)) |>
+  mutate(trap_work_first = fct_recode(trap_work_first, No = "FALSE", Yes = "TRUE", "NA" = "NULL")) |>
+  mutate(culprit_gender = fct_collapse(culprit_gender,
+                                           Male = c("Male", "Male,Male",
+                                                    "Male,Male,Male",
+                                                    "Male,Male,Male,Male",
+                                                    "Male,Male,Male,Male,Male"),
+                                           Female = c("Female", "Female,Female"),
+                                           "Male and Female" = c("Female,Female,Male",
+                                                                 "Female,Male",
+                                                                 "Female,Male, Male",
+                                                         "Female,Male,Female,Male,Male",
+                                                                 "Female,Male,Male",
+                                                                "Female,Male,Male,Male",
+                                                                 "Male,Female",                                                      "Male,Female,Female,Male,Male,Male,Female",
+                     "Male,Female,Female,Male,Male,Male,Female,Female,Male,Male,Female",
+                                                                 "Male,Female,Male",
+                                                             "Male,Female,Male,Female",
+                                                   "Male,Female,Male,Female,Male,Male",
+                                                                 "Male,Male,Female",
+                                                          "Male,Male,Female,Male,Male",
+                                                               "Male,Male,Male,Female",
+                          "Male,Male,Male,Male,Male,Male,Female,Male,Male,Male,Male"))) |>
+  mutate(monster_type = fct_collapse(monster_type,
+                                         "Ancient" = c("Ancient", "Ancient,Ancient",
+                                                       "Ancient,Animal",   "Ancient,Ghost,Extraterrestrial,Animal,Disguised,Ghost,Possessed Object,Magician,Magician,Ghost,Undead,Possessed Object,",
+                                                       "Ancient,Possessed", 
+                                                       "Ancient,Possessed Object"),
+                                         "Animal" = c("Animal", "Animal,Ancient",
+                                                      "Animal,Ancient,Ancient,Mechanical,Plant",
+                                                      "Animal,Animal",
+                                                      "Animal,Animal,Animal",
+                                                      "Animal,Animal,Animal,Animal",
+                                                      "Animal,Animal,Mythical,Possessed Object,Possessed Object,Ghost,Undead",
+                                                      "Animal,Disguised",
+                                                      "Animal,Mechanical",
+                                                      "Animal,Plant",
+                                                      "Animal,Undead",
+                                                      "Animal,Undead,Disguised,Animal,Disguise,Ghost,Ghost,Animal",
+                                                      "Animal,Undead,Undead"),
+                                         "Disguised" = c("Disguised", "Disguised,Animal",
+                                                         "Disguised,Animal,Possessed Object,Possessed Object,Possessed Object,Ancient,Possessed Object,Undead,Ghost,Undead,Undead",
+                                                         "Disguised,Disguised",
+                                                         "Disguised,Disguised,Disguised,Disguised",
+                                                         "Disguised,Skeleton",
+                                                         "Disguised,Undead,Animal,Animal",
+                                                         "Disguised,Undead,Undead"),
+                                         "Extraterrestrial" = c("Extraterrestrial",
+                                                                "Extraterrestrial,Animal,Extraterrestrial",
+                                                                "Extraterrestrial,Extraterrestrial",
+                                                                "Extraterrestrial,Extraterrestrial,Extraterrestrial"),
+                                         "Ghost" = c("Ghost", "Ghost,Ancient", "Ghost,Animal",
+                                                     "Ghost,Disguised",                   "Ghost,Disguised,Undead,Disguised,Animal,Animal,Animal,Ancient,Disguised",
+                                                     "Ghost,Ghost",
+                                                     "Ghost,Ghost,Animal","Ghost,Ghost,Ghost",
+                                                     "Ghost,Ghost,Ghost,Ghost",
+                                                     "Ghost,Ghost,Ghost,Ghost,Mythical",
+                                                     "Ghost,Ghost,Magician,Ghost", 
+                                                     "Ghost,Ghost,Mythical",
+                                                     "Ghost,Ghost,Undead,Animal,Animal",
+                                                     "Ghost,Ghost,Undead,Undead,Possessed Object,Ghost",
+                                                     "Ghost,Mythical","Ghost,Plant,Animal",
+                                                     "Ghost,Possessed Object","Ghost,Undead",
+                                                     "Ghost,Undead,Undead",
+                                                     "Ghost,Undead,Undead,Undead,Animal,Animal,Animal"),
+                                         "Magician" = c("Magician", "Magician,Animal",
+                                                        "Magician,Ghost,Ghost",
+                                                        "Magician,Ghost,Plant,Plant,Animal",
+                                                        "Magician,Magician,Magician,Magician",
+                                                        "Magician,Plant,Magician,Animal",
+                                                        "Magician,Possessed Object",
+                                                        "Magician,Possessed Object,Mythical,Demon"),
+                                         "Mechanical" = c("Mechanical", "Mechanical,Ghost",
+                                                          "Mechanical,Mechanical",
+                                                          "Mechanical,Mechanical,Mechanical",
+                                                          "Mechanical,Mechanical,Mechanical,Mechanical,Mechanical",
+                                                          "Mechanical,Super-Villain,Animal,Mythical",    "Mechanical,Super-Villain,Disguised,Disguised,Super-Villain,Super-Villain,Super-Villain,Mechanical"),
+                                         "Mythical" = c("Mythical", "Mythical,Ancient", 
+                                                        "Mythical,Animal,Magician",
+                                                        "Mythical,Ghost,Ghost",
+                                                        "Mythical,Ghost,Ghost,Ghost",
+                                                        "Mythical,Ghost,Ghost,Undead,Undead,Undead,Undead",
+                                                        "Mythical,Mythical",
+                                                        "Mythical,Mythical,Mythical,Mythical,Possessed Object,Possessed Object,Possessed Object,Possessed Object,Possessed Object,Animal",
+                                                        "Mythical,Mythical,Mythical,Undead,Mythical,Mythical",
+                                                        "Mythical,Plant,Plant,Mythical,Animal,Animal",
+                                                        "Mythical,Undead"),
+                                         "Plant" = c("Plant", "Plant,Animal,Animal,Magician",
+                                                     "Plant,Plant", "Plant,Possessed Object"),
+                                         "Possessed Object" = c("Possessed Object", 
+                                                                "Possessed Object,Ghost",
+                                                                "Possessed Object,Ghost,Ghost",
+                                                                "Possessed Object,Magician",
+                                                                "Possessed Object,Mythical,Animal,Animal,Animal",
+                                                                "Possessed Object,Possessed Object",
+                                                                "Possessed Object,Possessed Object,Possessed Object"),
+                                         "Super-Villain" = c("Super-Villain", 
+                                                             "Super-Villain,Disguised,Disguised",
+                                                             "Super-Villain,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Super-Villain",
+                                                             "Super-Villain,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Super-Villain,Super-Villain,Super-Villain",
+                                                             "Super-Villain,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Super-Villain",                                   "Super-Villain,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Super-Villain,Super-Villain,Super-Villain",                                      "Super-Villain,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Super-Villain",
+                                                             "Super-Villain,Disguised,Disguised,Disguised,Disguised,Disguised,Super-Villain",
+                                                             "Super-Villain,Disguised,Disguised,Super-Villain",
+                                                             "Super-Villain,Mechanical,Disguised,Super-Villain",
+                                                             "Super-Villain,Super-Villain,Disguised,Disguised,Super-Villain,Super-Villain",
+                                                             "Super-Villain,Super-Villain,Super-Villain",
+                                                             "Super-Villain,Super-Villain,Super-Villain,Disguised,Disguised,Disguised",
+                                                             "Super-Villain,Super-Villain,Super-Villain,Super-Villain,Disguised",
+                                                             "Super-Villain,Super-Villain,Super-Villain,Super-Villain,Super-Villain,Super-Villain,Super-Villain,Super-Villain,Super-Villain,Super-Villain,Super-Villain",
+                                                             "Super-Villain,Super-Villain,Super-Villain,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised",
+                                                             "Super-Villain,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Dr. Trebal",
+                                                             "Super-Villain,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Dr. Trebal,Super-Villain",
+                                                             "Super-Villain,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised, Disguised, Disguised,Super-Villain",
+                                                             "Super-Villain,Super-Villain,Super-Villain,Disguised,Super-Villain,Super-Villain,Super-Villain",
+                                                             "Super-Villain,Super-Villain,Mechanical,Super-Villain,Super-Villain,Disguised,Disguised",
+                                                             "Super-Villain,Super-Villain,Disguised,Disguised,Super-Villain,Super-Villain,Disguised,Disguised,Disguised",
+                                                             "Super-Villain,Super-Villain,Disguised,Disguised,Disguised,Disguised,Disguised,Super-Villain",
+                                                             "Super-Villain,Super-Villain,Disguised,Disguised,Disguised,Disguised,Disguised,Disguised,Super-Villain,Super-Villain",
+                                                             "Super-Villain,Disguised,Disguised,Disguised,Super-Villain,Super-Villain,Super-Villain,Super-Villain,Super-Villain",
+                                                             "Super-Villain,Disguised,Disguised,Super-Villain,Super-Villain,Super-Villain,Animal,Animal,Undead,Undead,Undead,Animal",
+                                                             "Super-Villain,Disguised,Disguised,Disguised,Super-Villain,Super-Villain,Super-Villain,Super-Villain,Super-Villain",
+                                                             "Super-Villain,Disguised,Disugised,Disguised,Super-Villain,Super-Villain,Super-Villain,Animal,Animal"),
+                                         "Undead" = c("Undead", "Undead,Animal", "Undead,Animal,Animal,Animal,Animal",
+                                                      "Undead,Animal,Undead", "Undead,Ghost,Ghost,Ghost,Ancient,Ghost,Ghost",
+                                                      "Undead,Ghost,Ghost,Ghost,Plant", "Undead,Ghost,Undead,Undead",
+                                                      "Undead,Magician", "Undead,Undead", "Undead,Undead,Animal",
+                                                      "Undead,Undead,Mythical,Mythical,Magician,Mythical,Mythical,Mythical",
+                                                      "Undead,Undead,Plant,Animal",
+                                                      "Undead,Undead,Undead", "Undead,Undead,Undead,Animal",
+                                                      "Undead,Undead,Undead,Undead",
+                                                      "Undead,Undead,Undead,Undead,Undead,Undead,Undead,Undead",
+                                                      "Undead,Animal,Undead,Undead,Magician,Magician,Undead,Undead,Possessed Object,Undead,Disfigured,Disfigured,Animal,Disguised,Insect,Insect,Possessed Object,Animal,Plant")))
 ```
 
 Data cleaning and baseline graph for each:
@@ -201,6 +333,55 @@ catchphrase_df |> filter(series_name == "A Pup Named Scooby-Doo") |> group_by(ca
   labs(title = "Catchphrase count for What's New Scooby Doo")
 ```
 
+Write Up graphs:
+```{r}
+#captured
+captured_graph <- captured_df |> group_by(who) |> summarise(count = sum(captured_by))
+captured_graph
+ggplot(data = captured_graph, aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                        "#B87333","#b2bb1b", "#F8991D")) +
+  labs(title = "Captured Count by Character", x = "Character", y = "Count")
+#so daphnie either gets captured the most or captures them the most
+
+#catchphrase
+catchphrase_graph <- catchphrase_df |> group_by(catchphrase) |> 
+  summarise(count = sum(Count))
+catchphrase_graph
+ggplot(data = catchphrase_graph, aes(x = catchphrase, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae","#F8991D",
+                                        "#B87333","#b2bb1b")) +
+  labs(title = "Catchphrase Count", x = "Catchphrase", y = "Count")
+# so Shaggy says Zoinks more than any other character says their catchphrase
+
+#caught
+caught_graph <- caught_df |> group_by(who) |> summarise(count = sum(caught_by))
+caught_graph
+ggplot(data = caught_graph, aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black", "red",
+                                        "#B87333","#b2bb1b", "#F8991D")) +
+  labs(title = "Captured Count by Character", x = "Character", y = "Count")
+#so Scooby catches the most
+
+#snacks
+snacks_graph <- snacks_df |> group_by(who) |> summarise(count = sum(snacks))
+snacks_graph
+ggplot(data = snacks_graph, aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                        "#B87333","#b2bb1b", "#F8991D")) +
+  labs(title = "Snack Count by Character", x = "Character", y = "Number of Snacks")
+#so Daphnie has the most number of snacks
+
+#unmasked
+unmasked_graph <- unmasked_df |> group_by(who) |> summarise(count = sum(unmasked))
+unmasked_graph
+ggplot(data = unmasked_graph, aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black",
+                                        "#B87333","#b2bb1b", "#F8991D")) +
+  labs(title = "Unmasked Count by Character", x = "Character", y = "Count")
+#so Fred unmasks the most
+```
+
 App
 ```{r}
 library(shiny)
@@ -219,12 +400,13 @@ ui <- fluidPage(
       selectInput("var_select", label = "Choose a variable", 
                   choices = c("Captured", "Catchphrase", "Caught",
                               "Snacks", "Unmasked")),
-      selectizeInput("filtering_var", label = "Choose a Variable to Filter By",
+      selectInput("filtering_var", label = "Choose a Variable to Filter By",
                      choices = c("none", "monster_type", "monster_amount",
                                  "monster_real","trap_work_first", "culprit_gender",
                                  "split_up","number_of_snacks"), 
-                     selected = "none",
-                     multiple = TRUE)
+                     selected = "none"),
+      selectInput("sub_filter_var", label = "Choose What to Filter By", 
+                     choices = NULL)
     ),
     mainPanel(
       plotOutput("barplot"),
@@ -234,6 +416,17 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session){
+  
+  observeEvent(input$filtering_var, {
+    if(input$filtering_var == "none"){
+      updateSelectInput(inputId = "sub_filter_var", choices = c("none"))
+    }
+    else{
+      filtering_var_vec <- df |> select(input$filtering_var) |> distinct()
+      updateSelectInput(inputId = "sub_filter_var", choices = filtering_var_vec)
+    }
+  })
+  
   
   output$barplot <- renderPlot({
     if(input$var_select == "Captured"){
@@ -341,32 +534,14 @@ server <- function(input, output, session){
 shinyApp(ui, server)
 ```
 
-Homework:
--make tables and graphs for final write up(look at all shiny variables but without filtering for season to see who unmasks, snacks, etc. the most)
--once monster variable is chosen, another thing pops up with the sub options for that variable (the levels)
+next class:
+-finish making the levels of all the monster variables nicer
 -start filtering by monster attributes
 
 ```{r}
-df |> group_by(monster_type) |> summarise(count = n()) |> print(n = 133)
-
-#ancient, animal, disguised, Extraterrestrial, Ghost, Magician, Mechanical, Mythical, NULL, Plant, Possessed Object, Super-Villain, Undead --> need to recode so there are only these basics OR MAKE A MONSTER COUNT??
-#THERE IS A MONSTER_AMOUNT VARIABLE IN SCOOBYDOO DATASET
-scoobydoo |> group_by(monster_amount) |> summarise(count = n())
-
-df |> group_by(monster_real) |> summarise(count = n())
-#levels: TRUE, FALSE, and NULL
-
-df |> group_by(trap_work_first) |> summarise(count = n())
-#levels: TRUE, FALSE, NULL, and NA
-
-df |> group_by(culprit_gender) |> summarise(count = n()) |> print(n = 24)
-# need to either make make it so it's only Male, Female, and NULL or make a culprit count list or both
-
-df |> group_by(split_up) |> summarise(count = n())
-#levels: 0, 1 , 2, and NULL (idk what 1 and 2 are for and it doesn't say on the data github)
+df |> group_by(monster_amount) |> summarise(count = n())
+##fine, just need to put in numerical order in the app
 
 df |> group_by(number_of_snacks) |> summarise(count = n())
 # different numbers of snacks, number of boxes, "a couple", NULL, lifetime supply, several, several boxes, truckload, and wheel barrel full
-
-## also will need a no filter one for different attributes/strategies
 ```

@@ -147,14 +147,18 @@ df <- df |> mutate(split_up = fct_recode(split_up, No = "0", Yes = "1", Yes = "2
                                                       "Undead,Undead,Undead", "Undead,Undead,Undead,Animal",
                                                       "Undead,Undead,Undead,Undead",
                                                       "Undead,Undead,Undead,Undead,Undead,Undead,Undead,Undead",
-                                                      "Undead,Animal,Undead,Undead,Magician,Magician,Undead,Undead,Possessed Object,Undead,Disfigured,Disfigured,Animal,Disguised,Insect,Insect,Possessed Object,Animal,Plant")))
+                                                      "Undead,Animal,Undead,Undead,Magician,Magician,Undead,Undead,Possessed Object,Undead,Disfigured,Disfigured,Animal,Disguised,Insect,Insect,Possessed Object,Animal,Plant"))) |>
+  mutate(number_of_snacks = fct_collapse(number_of_snacks,
+                                             "2" = c("2", "a couple"),
+                                             "3" = c("3", "several"),
+                                             "3 boxes" = c("3 boxes", "several boxes")))
 ```
 
 Data cleaning and baseline graph for each:
 
 caught
 ```{r}
-caught_df <- df |> select(1, 2, 5, 6, 7,8 , 9, 26, 27) |> 
+caught_df <- df |> select(1, 2, 3, 4, 5, 6, 7, 8 , 9, 26, 27, 28, 29, 30, 31, 36) |> 
   mutate(caught_fred = as.factor(caught_fred)) |>
   mutate(caught_fred = if_else(caught_fred == "TRUE",
                                true = "Fred",
@@ -183,7 +187,7 @@ caught_df <- df |> select(1, 2, 5, 6, 7,8 , 9, 26, 27) |>
   mutate(caught_not = if_else(caught_not == "TRUE",
                                true = "Not Caught",
                                false = "0")) |>
-  pivot_longer(cols = (3:9), names_to = "who", values_to = "caught_by") |>
+  pivot_longer(cols = (5:11), names_to = "who", values_to = "caught_by") |>
   separate(col = who, into = c("caught", "who"), sep = "_") |>
   mutate(caught_by = if_else(caught_by!=0, 1, 0))
 
@@ -197,7 +201,7 @@ caught_df |> filter(series_name == "What's New Scooby-Doo?") |>
 ```
 captured
 ```{r}
-captured_df <- df |> select(1, 2, 10:14) |> 
+captured_df <- df |> select(1:4, 10:14, 26:31, 36) |> 
   mutate(captured_fred = as.factor(captured_fred)) |>
   mutate(captured_fred = if_else(captured_fred == "TRUE",
                                true = "Fred",
@@ -218,7 +222,7 @@ captured_df <- df |> select(1, 2, 10:14) |>
   mutate(captured_scooby = if_else(captured_scooby == "TRUE",
                                true = "Scooby",
                                false = "0")) |>
-  pivot_longer(cols = (3:7), names_to = "who", values_to = "captured_by") |>
+  pivot_longer(cols = (5:9), names_to = "who", values_to = "captured_by") |>
   separate(col = who, into = c("captured", "who"), sep = "_") |>
   mutate(captured_by = if_else(captured_by!=0, 1, 0))
 
@@ -232,7 +236,7 @@ captured_df |> filter(series_name == "What's New Scooby-Doo?") |>
 ```
 unmasked
 ```{r}
-unmasked_df <- df |> select(1, 2, 15:19, 25) |> 
+unmasked_df <- df |> select(1:4, 15:19, 25:31, 36) |> 
   mutate(unmask_fred = as.factor(unmask_fred)) |>
   mutate(unmask_fred = if_else(unmask_fred == "TRUE",
                                true = "Fred",
@@ -257,7 +261,7 @@ unmasked_df <- df |> select(1, 2, 15:19, 25) |>
   mutate(unmask_other = if_else(unmask_other == "TRUE",
                                true = "Other",
                                false = "0")) |>
-  pivot_longer(cols = (3:8), names_to = "who", values_to = "unmasked") |>
+  pivot_longer(cols = (5:10), names_to = "who", values_to = "unmasked") |>
   separate(col = who, into = c("unmasked_by", "who"), sep = "_") |>
   mutate(unmasked = if_else(unmasked!=0, 1, 0))
 
@@ -271,7 +275,7 @@ unmasked_df |> filter(series_name == "What's New Scooby-Doo?") |>
 ```
 snack
 ```{r}
-snacks_df <- df |> select(1, 2, 20:24) |> 
+snacks_df <- df |> select(1:4, 20:24, 26:31, 36) |> 
   mutate(snack_fred = as.factor(snack_fred)) |>
   mutate(snack_fred = if_else(snack_fred == "TRUE",
                                true = "Fred",
@@ -292,7 +296,7 @@ snacks_df <- df |> select(1, 2, 20:24) |>
   mutate(snack_scooby = if_else(snack_scooby == "TRUE",
                                true = "Scooby",
                                false = "0")) |>
-  pivot_longer(cols = (3:7), names_to = "who", values_to = "snacks") |>
+  pivot_longer(cols = (5:9), names_to = "who", values_to = "snacks") |>
   separate(col = who, into = c("snack", "who"), sep = "_") |>
   mutate(snacks = if_else(snacks!=0, 1, 0))
 
@@ -313,8 +317,8 @@ snacks_df |> filter(series_name == "A Pup Named Scooby-Doo") |>
 
 catch phrases
 ```{r}
-catchphrase_df <- df |> select(1, 2, 32, 33, 34, 35) |>
-  pivot_longer(cols = (3:6), names_to = "catchphrase", values_to = "Count") |>
+catchphrase_df <- df |> select(1:4, 32:35, 26:31, 36) |>
+  pivot_longer(cols = (5:8), names_to = "catchphrase", values_to = "Count") |>
   mutate(Count = as.factor(Count)) |>
   mutate(Count = fct_recode(Count, "0" = "NULL")) |>
   mutate(Count = as.numeric(as.character(Count))) 
@@ -386,11 +390,18 @@ App
 ```{r}
 library(shiny)
 
-
 series_vec <- catchphrase_df |> 
-  mutate(series_name = factor(series_name)) |> 
+  mutate(series_name = as.factor(series_name)) |> 
   pull(series_name) |> 
   levels()
+
+df <- df |> mutate(number_of_snacks = as.factor(number_of_snacks)) |>
+  mutate(culprit_gender = as.factor(culprit_gender)) |>
+  mutate(monster_amount = as.factor(monster_amount)) |>
+  mutate(monster_real = as.factor(monster_real)) |>
+  mutate(monster_type = as.factor(monster_type)) |>
+  mutate(split_up = as.factor(split_up)) |>
+  mutate(trap_work_first = as.factor(trap_work_first))
 
 ui <- fluidPage(
   sidebarLayout(
@@ -401,9 +412,9 @@ ui <- fluidPage(
                   choices = c("Captured", "Catchphrase", "Caught",
                               "Snacks", "Unmasked")),
       selectInput("filtering_var", label = "Choose a Variable to Filter By",
-                     choices = c("none", "monster_type", "monster_amount",
-                                 "monster_real","trap_work_first", "culprit_gender",
-                                 "split_up","number_of_snacks"), 
+                     choices = c("culprit_gender", "monster_amount",
+                                 "monster_real", "monster_type", "none",
+                                 "number_of_snacks", "split_up", "trap_work_first"), 
                      selected = "none"),
       selectInput("sub_filter_var", label = "Choose What to Filter By", 
                      choices = NULL)
@@ -422,15 +433,17 @@ server <- function(input, output, session){
       updateSelectInput(inputId = "sub_filter_var", choices = c("none"))
     }
     else{
-      filtering_var_vec <- df |> select(input$filtering_var) |> distinct()
+      filtering_var_vec <-df |> 
+       filter(series_name == input$series_select) |> ##why does it still have all the levels??
+       pull(input$filtering_var) |>
+       levels()
       updateSelectInput(inputId = "sub_filter_var", choices = filtering_var_vec)
     }
   })
   
-  
   output$barplot <- renderPlot({
     if(input$var_select == "Captured"){
-      captured_df |> filter(series_name == input$series_select) |>
+      captured_df |> filter(series_name == input$series_select) |> 
         group_by(who) |> summarise(count = sum(captured_by)) |>
         ggplot(aes(x = who, y = count)) +
         geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
@@ -455,6 +468,7 @@ server <- function(input, output, session){
       else{
         if(input$var_select == "Caught"){
           caught_df |> filter(series_name == input$series_select) |>
+            filter(monster_type == input$sub_filter_var) |>
             group_by(who) |> summarise(count = sum(caught_by)) |>
             ggplot(aes(x = who, y = count)) +
             geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black", "red",
@@ -532,16 +546,30 @@ server <- function(input, output, session){
 }
 
 shinyApp(ui, server)
+
+#need to figure out why some of them are blank, no background whereas some are background but no bars
+#also need to figure out why I can have filter(input$filtering_var == __)
+#then need to figure out what to do about "none" because I still want the default graph I had before... probably need an if_else :(
+#then add it to all other graphs and then all the tables
 ```
 
+homework: 
+- make more plots for the write up (include variability between the episodes somehow -> maybe make them reactive so you can see what episode is what and color by season)
+-make filtering work for caught graph
+
 next class:
--finish making the levels of all the monster variables nicer
--start filtering by monster attributes
+- add filtering to all other variables
+- add filtering to tables
 
 ```{r}
-df |> group_by(monster_amount) |> summarise(count = n())
-##fine, just need to put in numerical order in the app
+#mechical (bakcground) vs. magician (empty)
+##magician is empty because there are none in that series --> gonna be an issue for the table... maybe need to change the vector to accommodate available options specific to that season...
+#mechanical IS in the series but no one caught it?? but not in caught_not
 
-df |> group_by(number_of_snacks) |> summarise(count = n())
-# different numbers of snacks, number of boxes, "a couple", NULL, lifetime supply, several, several boxes, truckload, and wheel barrel full
+caught_df |> filter(series_name == "Scooby Doo, Where Are You!") |>
+  group_by(monster_type) |> summarise(n())
+
+df |> filter(series_name == "Scooby Doo, Where Are You!") |> group_by(monster_type) |> summarise() #just doing this and changing to input doesn't work!!
+
+df |> filter(series_name == "Scooby Doo, Where Are You!") |> select(monster_type)
 ```

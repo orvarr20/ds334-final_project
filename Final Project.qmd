@@ -455,13 +455,17 @@ server <- function(input, output, session){
     }
     else{
       if(input$var_select == "Captured"){
-        filtering_vec <- captured_df |>
-                                     filter(series_name == input$series_select) |>
-                                     distinct(input$filtering_var) |>
-                                     pull()
+        if(input$series_select == "none"){
+          filtering_vec <- captured_df |> select(input$filtering_var) |>
+                                       distinct()
+          updateSelectInput(inputId = "sub_filter_var", choices = filtering_vec)
+        }
+        else{
+        filtering_vec <- captured_df |> filter(series_name == input$series_select) |>
+          select(input$filtering_var) |> distinct()
         updateSelectInput(inputId = "sub_filter_var", choices = filtering_vec)
+        }
       }
-      ##get this to work and then do it for all other vars
     }
   })
   
@@ -469,6 +473,7 @@ server <- function(input, output, session){
     if(input$var_select == "Captured"){
       if(input$series_select == "none"){
         captured_df |> group_by(who) |> summarise(count = sum(captured_by)) |>
+          filter(input$filtering_var == input$sub_filter_var) |>
           ggplot(aes(x = who, y = count)) +
           geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
                                                 "#B87333","#b2bb1b", "#F8991D")) +
@@ -477,6 +482,7 @@ server <- function(input, output, session){
           theme_minimal()
       }
       else{
+        if(input$sub_filter_var == "none"){
         captured_df |> filter(series_name == input$series_select) |> 
           group_by(who) |> summarise(count = sum(captured_by)) |>
           ggplot(aes(x = who, y = count)) +
@@ -486,6 +492,21 @@ server <- function(input, output, session){
                title = glue::glue("Captured count by character for ",
                                   input$series_select)) +
           theme_minimal()
+        }
+        else{
+          captured_df |> filter(series_name == input$series_select) |> 
+          filter(input$filtering_var == input$sub_filter_var) |>
+          group_by(who) |> summarise(count = sum(captured_by)) |>
+          ggplot(aes(x = who, y = count)) +
+          geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                                "#B87333","#b2bb1b", "#F8991D")) +
+          labs(x = "Character", y = "Captured Count", 
+               title = glue::glue("Captured count by character for ",
+                                  input$series_select, " with  ",
+                                  input$sub_filter_var, " for the ",
+                                  input$filtering_var)) +
+          theme_minimal()
+        }
       }
     }
     else{
@@ -594,9 +615,17 @@ server <- function(input, output, session){
         summarise("Captured Count" = sum(captured_by))
       }
       else{
-        captured_df |> filter(series_name == input$series_select) |>
-        mutate(Character = who) |> group_by(Character) |> 
-        summarise("Captured Count" = sum(captured_by))
+        if(input$sub_filter_var == "none"){
+          captured_df |> filter(series_name == input$series_select) |>
+          mutate(Character = who) |> group_by(Character) |> 
+          summarise("Captured Count" = sum(captured_by))
+        }
+        else{
+          captured_df |> filter(series_name == input$series_select) |>
+            filter(input$filtering_var == input$sub_filter_var) |>
+          mutate(Character = who) |> group_by(Character) |> 
+          summarise("Captured Count" = sum(captured_by))
+        }
       }
     }
     else{
@@ -657,39 +686,32 @@ server <- function(input, output, session){
 shinyApp(ui, server)
 ```
 
-next class:
--questions: how to get filtering to work!!! And for jitter plot is it possible to color by person?? and then add to every graph
-- get filtering work for captured graph (the drop downs and graph)
-- add filtering to all other variables
-- add filtering to tables
+Homework:
+- get jitter plots to color by character
+-get filtering working for the overall graphs and tables (ISSUE IS WITH INPUT$FILTERING_VAR) --> works with monster_type == input$sub_filter_var but not with input$filtering_var == "Mechanical" --> need to change something in ObserveEvent??
+- add filtering to all other variables, graphs, and tables
 
 ```{r}
-#mechical (bakcground) vs. magician (empty)
-##magician is empty because there are none in that series --> gonna be an issue for the table... maybe need to change the vector to accommodate available options specific to that season...
-#mechanical IS in the series but no one caught it?? but not in caught_not
+captured_df |> filter(series_name == "A Pup Named Scooby-Doo") |>
+            filter(monster_type == "Mechanical") |>
+          group_by(who) |> summarise(count = sum(captured_by)) |>
+          ggplot(aes(x = who, y = count)) +
+          geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                                "#B87333","#b2bb1b", "#F8991D")) +
+          theme_minimal()
 
-caught_df |> filter(series_name == "Scooby Doo, Where Are You!") |>
-  group_by(monster_type) |> summarise(n())
-
-df |> filter(series_name == "Scooby Doo, Where Are You!") |> group_by(monster_type) |> summarise() #just doing this and changing to input doesn't work!!
-
-df |> filter(series_name == "Scooby Doo, Where Are You!") |> select(monster_type)
-
-
-df |> filter(series_name == "Scooby Doo, Where Are You!") |> group_by(monster_type) |>
-  pull(monster_type) |> levels()
-
-df |> filter(series_name == "Scooby Doo, Where Are You!") |> distinct(monster_type) |> 
-  pull(monster_type)
-
-captured_df |> filter(series_name == "Scooby Doo, Where Are You!") |> distinct(monster_type) |> pull(monster_type)
-
-
-series_vec
+captured_df |> filter(series_name == "A Pup Named Scooby-Doo") |> 
+          filter(monster_type == "Possessed Object") |>
+          group_by(who) |> summarise(count = sum(captured_by)) |>
+          ggplot(aes(x = who, y = count)) +
+          geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                                "#B87333","#b2bb1b", "#F8991D")) +
+          theme_minimal()
 
 
 
 captured_df |> filter(series_name == "A Pup Named Scooby-Doo") |>
-                                     distinct(monster_type) |>
-                                     pull(monster_type)
+            filter(monster_type == "Mechanical") |>
+          mutate(Character = who) |> group_by(Character) |> 
+          summarise("Captured Count" = sum(captured_by))
 ```

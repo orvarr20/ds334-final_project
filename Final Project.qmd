@@ -350,8 +350,16 @@ ggplot(data = captured_graph, aes(x = who, y = count)) +
 #so daphnie either gets captured the most or captures them the most
 captured_plot <- captured_df|> group_by(who, series_name) |> summarise(count = sum(captured_by)) |>
   ggplot(aes(x = who, y = count, label = series_name)) +
-  geom_jitter(width = 0.1) ##how to get this to be filled by who??
-ggplotly(captured_plot, tooltip = "label")
+  geom_jitter(width = 0.1, aes(color = who)) +
+  scale_color_manual(values = c("daphnie" = "#7c68ae",
+                                "fred" = "#76a2ca",
+                                "scooby" = "#B87333",
+                                "shaggy" = "#b2bb1b",
+                                "velma" = "#F8991D")) +
+  theme_minimal() +
+  labs(title = "Captured Count by Character", x = "Character", y = "Count")
+ggplotly(captured_plot, tooltip = "label") |> style(showlegend = FALSE)
+
 
 #catchphrase
 catchphrase_graph <- catchphrase_df |> group_by(catchphrase) |> 
@@ -362,10 +370,17 @@ ggplot(data = catchphrase_graph, aes(x = catchphrase, y = count)) +
                                         "#B87333","#b2bb1b")) +
   labs(title = "Catchphrase Count", x = "Catchphrase", y = "Count")
 # so Shaggy says Zoinks more than any other character says their catchphrase
-catchphrase_plot <- catchphrase_df|> group_by(catchphrase, series_name) |> summarise(count = sum(Count)) |>
+catchphrase_plot <- catchphrase_df|> group_by(catchphrase, series_name) |> 
+  summarise(count = sum(Count)) |>
   ggplot(aes(x = catchphrase, y = count, label = series_name)) +
-  geom_jitter(width = 0.1) 
-ggplotly(catchphrase_plot, tooltip = "label")
+  geom_jitter(width = 0.1, aes(color = catchphrase)) +
+  scale_color_manual(values = c("jeepers" = "#7c68ae",
+                                "rooby_rooby_roo" = "#B87333",
+                                "zoinks" = "#b2bb1b",
+                                "jinkies" = "#F8991D")) +
+  theme_minimal() +
+  labs(title = "Catchphrase Count", x = "Catchphrase", y = "Count")
+ggplotly(catchphrase_plot, tooltip = "label") |> style(showlegend = FALSE)
 
 #caught
 caught_graph <- caught_df |> group_by(who) |> summarise(count = sum(caught_by))
@@ -375,10 +390,20 @@ ggplot(data = caught_graph, aes(x = who, y = count)) +
                                         "#B87333","#b2bb1b", "#F8991D")) +
   labs(title = "Captured Count by Character", x = "Character", y = "Count")
 #so Scooby catches the most
-caught_plot <- caught_df|> group_by(who, series_name) |> summarise(count = sum(caught_by)) |>
+caught_plot <- caught_df|> group_by(who, series_name) |> 
+  summarise(count = sum(caught_by)) |>
   ggplot(aes(x = who, y = count, label = series_name)) +
-  geom_jitter(width = 0.1) ##how to get this to be filled by who??
-ggplotly(caught_plot, tooltip = "label")
+  geom_jitter(width = 0.1, aes(color = who)) +
+  scale_color_manual(values = c("daphnie" = "#7c68ae",
+                                "fred" = "#76a2ca",
+                                "not" = "black",
+                                "other" = "red",
+                                "scooby" = "#B87333",
+                                "shaggy" = "#b2bb1b",
+                                "velma" = "#F8991D")) +
+  theme_minimal() +
+  labs(title = "Caught Count by Character", x = "Character", y = "Count")
+ggplotly(caught_plot, tooltip = "label") |> style(showlegend = FALSE)
 
 #snacks
 snacks_graph <- snacks_df |> group_by(who) |> summarise(count = sum(snacks))
@@ -388,10 +413,18 @@ ggplot(data = snacks_graph, aes(x = who, y = count)) +
                                         "#B87333","#b2bb1b", "#F8991D")) +
   labs(title = "Snack Count by Character", x = "Character", y = "Number of Snacks")
 #so Daphnie has the most number of snacks
-snacks_plot <- snacks_df|> group_by(who, series_name) |> summarise(count = sum(snacks)) |>
+snacks_plot <- snacks_df|> group_by(who, series_name) |> 
+  summarise(count = sum(snacks)) |>
   ggplot(aes(x = who, y = count, label = series_name)) +
-  geom_jitter(width = 0.1) ##how to get this to be filled by who??
-ggplotly(snacks_plot, tooltip = "label")
+  geom_jitter(width = 0.1, aes(color = who)) +
+  scale_color_manual(values = c("daphnie" = "#7c68ae",
+                                "fred" = "#76a2ca",
+                                "scooby" = "#B87333",
+                                "shaggy" = "#b2bb1b",
+                                "velma" = "#F8991D")) +
+  theme_minimal() +
+  labs(title = "Snack Count by Character", x = "Character", y = "Number of Snacks")
+ggplotly(snacks_plot, tooltip = "label") |> style(showlegend = FALSE)
 
 #unmasked
 unmasked_graph <- unmasked_df |> group_by(who) |> summarise(count = sum(unmasked))
@@ -403,8 +436,16 @@ ggplot(data = unmasked_graph, aes(x = who, y = count)) +
 #so Fred unmasks the most
 unmasked_plot <- unmasked_df|> group_by(who, series_name) |> summarise(count = sum(unmasked)) |>
   ggplot(aes(x = who, y = count, label = series_name)) +
-  geom_jitter(width = 0.1) ##how to get this to be filled by who??
-ggplotly(unmasked_plot, tooltip = c("label"))
+  geom_jitter(width = 0.1, aes(color = who)) +
+  scale_color_manual(values = c("daphnie" = "#7c68ae",
+                                "fred" = "#76a2ca",
+                                "other" = "black",
+                                "scooby" = "#B87333",
+                                "shaggy" = "#b2bb1b",
+                                "velma" = "#F8991D")) +
+  theme_minimal() +
+  labs(title = "Unmasked Count by Character", x = "Chacacter", y = "Count")
+ggplotly(unmasked_plot, tooltip = c("label")) |> style(showlegend = FALSE)
 ```
 
 App
@@ -464,6 +505,19 @@ server <- function(input, output, session){
         filtering_vec <- captured_df |> filter(series_name == input$series_select) |>
           select(input$filtering_var) |> distinct()
         updateSelectInput(inputId = "sub_filter_var", choices = filtering_vec)
+        }
+      }
+      if(input$var_select == "Catchphrase"){
+        if(input$series_select == "none"){
+          filtering_vec <- catchphrase_df |> select(input$filtering_var) |>
+            distinct()
+          updateSelectInput(inputId = "sub_filter_var", choices = filtering_vec)
+        }
+        else{
+          filtering_vec <- catchphrase_df |> 
+            filter(series_name == input$series_select) |>
+            select(input$filtering_var) |> distinct()
+          updateSelectInput(inputId = "sub_filter_var", choices = filtering_vec)
         }
       }
     }
@@ -686,10 +740,23 @@ server <- function(input, output, session){
 shinyApp(ui, server)
 ```
 
+Wednesday class:
+-what's up with sometimes updating sometimes not?? in observe Event
+- get filtering to work for overall graphs and tables. The issue is with input$filtering var.
+(it works with monster_type == input$sub_filter_var but with input$filtering_var == "Mechanical)
+-maybe need to change something in ObserveEvent??
+
 Homework:
-- get jitter plots to color by character
--get filtering working for the overall graphs and tables (ISSUE IS WITH INPUT$FILTERING_VAR) --> works with monster_type == input$sub_filter_var but not with input$filtering_var == "Mechanical" --> need to change something in ObserveEvent??
 - add filtering to all other variables, graphs, and tables
+
+Monday class:
+- do the entire write-up
+
+Homework:
+-make updated blog post
+
+Wednesday class:
+-relook over everything, make sure everything is working, submit
 
 ```{r}
 captured_df |> filter(series_name == "A Pup Named Scooby-Doo") |>

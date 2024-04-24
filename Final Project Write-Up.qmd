@@ -1,0 +1,143 @@
+---
+title: "Final Project Write-Up"
+author: "Olivia Varricchione"
+format: 
+  html:
+    embed-resources: true
+---
+
+UPDATE THE README!!!!!!
+
+README (10 points). You should update your repository’s README page. To do so, imagine that someone has just two minutes to look at your project. What you would want to show for just two minutes should appear in the README file.
+
+
+**Abstract**
+
+A Scooby-Doo dataset obtained from tidyTuesday was analyzed to look at which character catches, captures, unmasks, and snacks the most throughout all of the Scooby-Doo series. A shiny app was made to aid in the understanding of how these outcomes change based on certain characteristics of the investigations. It was found that throughout all of the Scooby-Doo series, Daphnie captures and snacks the most, Shaggy says his catchphrase, Zoinks, the most, Scooby catches the most, and Fred unmasks the most.
+
+**Introduction**
+
+This analysis will be using the Scooby-Doo data set from tidyTuesday that can be found at this web address: https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-07-13/readme.md. The data set has 603 observations by accounting for all of the different Scooby-Doo series, including cross over episodes, and looks at 75 different variables. The main variables of interest include the series name and the caught, captured, unmasked, catchphrase and snack variables for the different characters. This analysis will focus on determining which character catches, captures, unmasks, says their catchphrase, and snacks the most throughout the Scooby-Doo series. Additionally, a shiny app was made to help determine how these numbers change when focusing on different characteristics of the investigation. The different characteristics include the culprit's gender, how many monsters there were, if the monster was real, what type of monster it was, how many total snacks were consumed, if the group split up during the investigation, and if there was trap work set up prior to catching the monster.
+
+**Visualizations**
+
+(110 points) a section showing relevant visualizations. Keep in mind that you do not need to write this as though it is a “step-by-step” thought-process. Instead, you should include your most interesting visualizations, along with interpretations for each. This section will likely be the longest, and, if you are answering multiple different questions of interest, you might break this section up into subsections.
+optionally, you can reference a Shiny app in this section, perhaps providing static visuals from your app. If you did build a Shiny app for your project, then this section is expected to be shorter than if you did not build a Shiny app. But, you should still describe major findings from the Shiny app.
+
+Write Up graphs:
+```{r}
+##WILL WANT TO INCLUDE ALL DATA CLEAING IN THIS DOCUMENT TOO!!!
+
+library(plotly)
+#captured
+captured_graph <- captured_df |> group_by(who) |> summarise(count = sum(captured_by))
+captured_graph
+ggplot(data = captured_graph, aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                        "#B87333","#b2bb1b", "#F8991D")) +
+  labs(title = "Captured Count by Character", x = "Character", y = "Count")
+#so daphnie either gets captured the most or captures them the most
+captured_plot <- captured_df|> group_by(who, series_name) |> summarise(count = sum(captured_by)) |>
+  ggplot(aes(x = who, y = count, label = series_name)) +
+  geom_jitter(width = 0.1, aes(color = who)) +
+  scale_color_manual(values = c("daphnie" = "#7c68ae",
+                                "fred" = "#76a2ca",
+                                "scooby" = "#B87333",
+                                "shaggy" = "#b2bb1b",
+                                "velma" = "#F8991D")) +
+  theme_minimal() +
+  labs(title = "Captured Count by Character", x = "Character", y = "Count")
+ggplotly(captured_plot, tooltip = "label") |> style(showlegend = FALSE)
+
+
+#catchphrase
+catchphrase_graph <- catchphrase_df |> group_by(catchphrase) |> 
+  summarise(count = sum(Count))
+catchphrase_graph
+ggplot(data = catchphrase_graph, aes(x = catchphrase, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae","#F8991D",
+                                        "#B87333","#b2bb1b")) +
+  labs(title = "Catchphrase Count", x = "Catchphrase", y = "Count")
+# so Shaggy says Zoinks more than any other character says their catchphrase
+catchphrase_plot <- catchphrase_df|> group_by(catchphrase, series_name) |> 
+  summarise(count = sum(Count)) |>
+  ggplot(aes(x = catchphrase, y = count, label = series_name)) +
+  geom_jitter(width = 0.1, aes(color = catchphrase)) +
+  scale_color_manual(values = c("jeepers" = "#7c68ae",
+                                "rooby_rooby_roo" = "#B87333",
+                                "zoinks" = "#b2bb1b",
+                                "jinkies" = "#F8991D")) +
+  theme_minimal() +
+  labs(title = "Catchphrase Count", x = "Catchphrase", y = "Count")
+ggplotly(catchphrase_plot, tooltip = "label") |> style(showlegend = FALSE)
+
+#caught
+caught_graph <- caught_df |> group_by(who) |> summarise(count = sum(caught_by))
+caught_graph
+ggplot(data = caught_graph, aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black", "red",
+                                        "#B87333","#b2bb1b", "#F8991D")) +
+  labs(title = "Captured Count by Character", x = "Character", y = "Count")
+#so Scooby catches the most
+caught_plot <- caught_df|> group_by(who, series_name) |> 
+  summarise(count = sum(caught_by)) |>
+  ggplot(aes(x = who, y = count, label = series_name)) +
+  geom_jitter(width = 0.1, aes(color = who)) +
+  scale_color_manual(values = c("daphnie" = "#7c68ae",
+                                "fred" = "#76a2ca",
+                                "not" = "black",
+                                "other" = "red",
+                                "scooby" = "#B87333",
+                                "shaggy" = "#b2bb1b",
+                                "velma" = "#F8991D")) +
+  theme_minimal() +
+  labs(title = "Caught Count by Character", x = "Character", y = "Count")
+ggplotly(caught_plot, tooltip = "label") |> style(showlegend = FALSE)
+
+#snacks
+snacks_graph <- snacks_df |> group_by(who) |> summarise(count = sum(snacks))
+snacks_graph
+ggplot(data = snacks_graph, aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                        "#B87333","#b2bb1b", "#F8991D")) +
+  labs(title = "Snack Count by Character", x = "Character", y = "Number of Snacks")
+#so Daphnie has the most number of snacks
+snacks_plot <- snacks_df|> group_by(who, series_name) |> 
+  summarise(count = sum(snacks)) |>
+  ggplot(aes(x = who, y = count, label = series_name)) +
+  geom_jitter(width = 0.1, aes(color = who)) +
+  scale_color_manual(values = c("daphnie" = "#7c68ae",
+                                "fred" = "#76a2ca",
+                                "scooby" = "#B87333",
+                                "shaggy" = "#b2bb1b",
+                                "velma" = "#F8991D")) +
+  theme_minimal() +
+  labs(title = "Snack Count by Character", x = "Character", y = "Number of Snacks")
+ggplotly(snacks_plot, tooltip = "label") |> style(showlegend = FALSE)
+
+#unmasked
+unmasked_graph <- unmasked_df |> group_by(who) |> summarise(count = sum(unmasked))
+unmasked_graph
+ggplot(data = unmasked_graph, aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black",
+                                        "#B87333","#b2bb1b", "#F8991D")) +
+  labs(title = "Unmasked Count by Character", x = "Character", y = "Count")
+#so Fred unmasks the most
+unmasked_plot <- unmasked_df|> group_by(who, series_name) |> summarise(count = sum(unmasked)) |>
+  ggplot(aes(x = who, y = count, label = series_name)) +
+  geom_jitter(width = 0.1, aes(color = who)) +
+  scale_color_manual(values = c("daphnie" = "#7c68ae",
+                                "fred" = "#76a2ca",
+                                "other" = "black",
+                                "scooby" = "#B87333",
+                                "shaggy" = "#b2bb1b",
+                                "velma" = "#F8991D")) +
+  theme_minimal() +
+  labs(title = "Unmasked Count by Character", x = "Chacacter", y = "Count")
+ggplotly(unmasked_plot, tooltip = c("label")) |> style(showlegend = FALSE)
+```
+
+**Conclusion**
+- summarize major findings
+-describe future work that you would complete if you have more time
+- limitations in the visualizations --> in snack its true or false, doesn't take into account HOW MANY in that snack

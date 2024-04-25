@@ -645,14 +645,8 @@ server <- function(input, output, session){
 shinyApp(ui, server)
 ```
 
-Homework:
--finish making table work for captured_df with and without series_select using smaller app below
--update observe event so that if ANY of them change (series_select, filtering_var, or var_select changes it updates the options for sub_filtering_var)
--make filtering work for overall datasets too
-
 Monday class:
-- add filtering to all other variables, graphs, and tables
-(need to use .data[[input$filtering_var]]!!)
+- add filtering for caught, snacks, and unmasked graphs and tables to the smaller app below
 
 Homework:
 -finish the write-up
@@ -664,7 +658,7 @@ Wednesday class:
 ```{r}
 server <- function(input, output, session){
   
-  observeEvent(input$filtering_var, {
+  observeEvent(list(input$filtering_var,  input$series_select, input$var_select), {
     if(input$filtering_var == "none"){
       updateSelectInput(inputId = "sub_filter_var", choices = c("none"))
     }
@@ -684,6 +678,66 @@ server <- function(input, output, session){
         updateSelectInput(inputId = "sub_filter_var", choices = filtering_vec)
         }
       }
+      if(input$var_select == "Catchphrase"){
+        if(input$series_select == "none"){
+          filtering_vec <- catchphrase_df |> 
+            filter(Count != 0) |>
+            select(input$filtering_var) |>
+            distinct()
+          updateSelectInput(inputId = "sub_filter_var", choices = filtering_vec)
+        }
+        else{
+        filtering_vec <- catchphrase_df |> filter(series_name == input$series_select) |>
+          filter(Count != 0) |>
+          select(input$filtering_var) |> distinct()
+        updateSelectInput(inputId = "sub_filter_var", choices = filtering_vec)
+        }
+      }
+      if(input$var_select == "Caught"){
+        if(input$series_select == "none"){
+          filtering_vec <- caught_df |> 
+            filter(caught_by != 0) |>
+            select(input$filtering_var) |>
+            distinct()
+          updateSelectInput(inputId = "sub_filter_var", choices = filtering_vec)
+        }
+        else{
+        filtering_vec <- caught_df |> filter(series_name == input$series_select) |>
+          filter(caught_by != 0) |>
+          select(input$filtering_var) |> distinct()
+        updateSelectInput(inputId = "sub_filter_var", choices = filtering_vec)
+        }
+      }
+      if(input$var_select == "Snacks"){
+        if(input$series_select == "none"){
+          filtering_vec <- snacks_df |> 
+            filter(snacks != 0) |>
+            select(input$filtering_var) |>
+            distinct()
+          updateSelectInput(inputId = "sub_filter_var", choices = filtering_vec)
+        }
+        else{
+        filtering_vec <- snacks_df |> filter(series_name == input$series_select) |>
+          filter(snacks != 0) |>
+          select(input$filtering_var) |> distinct()
+        updateSelectInput(inputId = "sub_filter_var", choices = filtering_vec)
+        }
+      }
+      if(input$var_select == "Unmasked"){
+        if(input$series_select == "none"){
+          filtering_vec <- unmasked_df |> 
+            filter(unmasked_by != 0) |>
+            select(input$filtering_var) |>
+            distinct()
+          updateSelectInput(inputId = "sub_filter_var", choices = filtering_vec)
+        }
+        else{
+        filtering_vec <- unmasked_df |> filter(series_name == input$series_select) |>
+          filter(unmasked_by != 0) |>
+          select(input$filtering_var) |> distinct()
+        updateSelectInput(inputId = "sub_filter_var", choices = filtering_vec)
+        }
+      }
     }
   })
   
@@ -692,51 +746,103 @@ server <- function(input, output, session){
       if(input$series_select == "none"){
         if(input$filtering_var == "none"){
           captured_df |> group_by(who) |> summarise(count = sum(captured_by)) |>
-          ggplot(aes(x = who, y = count)) +
-          geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
-                                                "#B87333","#b2bb1b", "#F8991D")) +
-          labs(x = "Character", y = "Captured Count", 
-               title = "Overall captured count by character") +
-          theme_minimal()
+            ggplot(aes(x = who, y = count)) +
+            geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                                  "#B87333","#b2bb1b", "#F8991D")) +
+            labs(x = "Character", y = "Captured Count", 
+                 title = "Overall captured count by character") +
+            theme_minimal()
         }
-        ##ISSUE HERE (I think): In argument .data[["monster_type"]]=input$sub_filter_var
-        ## column monster_type not found in .data
         else{
           captured_df |> filter(.data[[input$filtering_var]] == input$sub_filter_var) |>
-          group_by(who) |> summarise(count = sum(captured_by)) |>
-          ggplot(aes(x = who, y = count)) +
-          geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
-                                                "#B87333","#b2bb1b", "#F8991D")) +
-          labs(x = "Character", y = "Captured Count", 
-               title = "Overall captured count by character") +
-          theme_minimal()
+            group_by(who) |> summarise(count = sum(captured_by)) |>
+            ggplot(aes(x = who, y = count)) +
+            geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                                  "#B87333","#b2bb1b", "#F8991D")) +
+            labs(x = "Character", y = "Captured Count", 
+                 title = glue::glue("Captured count by character with  ",
+                                    input$sub_filter_var, " for the ",
+                                    input$filtering_var)) +
+            theme_minimal()
         }
       }
       else{
-        if(input$sub_filter_var == "none"){
-        captured_df |> filter(series_name == input$series_select) |> 
-          group_by(who) |> summarise(count = sum(captured_by)) |>
-          ggplot(aes(x = who, y = count)) +
-          geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
-                                                "#B87333","#b2bb1b", "#F8991D")) +
-          labs(x = "Character", y = "Captured Count", 
-               title = glue::glue("Captured count by character for ",
-                                  input$series_select)) +
-          theme_minimal()
+        if(input$filtering_var == "none"){
+          captured_df |> filter(series_name == input$series_select) |> 
+            group_by(who) |> summarise(count = sum(captured_by)) |>
+            ggplot(aes(x = who, y = count)) +
+            geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                                  "#B87333","#b2bb1b", "#F8991D")) +
+            labs(x = "Character", y = "Captured Count", 
+                 title = "Overall captured count by character") +
+            theme_minimal()
         }
         else{
           captured_df |> filter(series_name == input$series_select) |> 
-          filter(.data[[input$filtering_var]] == input$sub_filter_var) |>
-          group_by(who) |> summarise(count = sum(captured_by)) |>
-          ggplot(aes(x = who, y = count)) +
-          geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
-                                                "#B87333","#b2bb1b", "#F8991D")) +
-          labs(x = "Character", y = "Captured Count", 
-               title = glue::glue("Captured count by character for ",
-                                  input$series_select, " with  ",
-                                  input$sub_filter_var, " for the ",
-                                  input$filtering_var)) +
-          theme_minimal()
+            filter(.data[[input$filtering_var]] == input$sub_filter_var) |>
+            group_by(who) |> summarise(count = sum(captured_by)) |>
+            ggplot(aes(x = who, y = count)) +
+            geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                                  "#B87333","#b2bb1b", "#F8991D")) +
+            labs(x = "Character", y = "Captured Count", 
+                 title = glue::glue("Captured count by character for ",
+                                    input$series_select, " with  ",
+                                    input$sub_filter_var, " for the ",
+                                    input$filtering_var)) +
+            theme_minimal()
+        }
+      }
+    }
+    else{
+      if(input$var_select == "Catchphrase"){
+        if(input$series_select == "none"){
+          if(input$filtering_var == "none"){
+            catchphrase_df |> group_by(catchphrase) |> summarise(count = sum(Count)) |>
+              ggplot(aes(x = catchphrase, y = count)) +
+              geom_col(position = "dodge", fill = c("#7c68ae", "#F8991D",
+                                                    "#B87333","#b2bb1b")) +
+              labs(x = "Catchphrase", y = "Count", 
+                   title = "Overall catchphrase count") +
+              theme_minimal()
+          }
+          else{
+            catchphrase_df |> filter(.data[[input$filtering_var]] == input$sub_filter_var) |>
+              group_by(catchphrase) |> summarise(count = sum(Count)) |>
+              ggplot(aes(x = catchphrase, y = count)) +
+              geom_col(position = "dodge", fill = c("#7c68ae", "#F8991D",
+                                                    "#B87333","#b2bb1b")) +
+              labs(x = "Catchphrase", y = "Count", 
+                   title = glue::glue("Catchphrase count with ",
+                                      input$sub_filter_var, " for the ",
+                                      input$filtering_var)) +
+              theme_minimal()
+          }
+        }
+        else{
+          if(input$filtering_var == "none"){
+            catchphrase_df |> filter(series_name == input$series_select) |> 
+              group_by(catchphrase) |> summarise(count = sum(Count)) |>
+              ggplot(aes(x = catchphrase, y = count)) +
+              geom_col(position = "dodge", fill = c("#7c68ae", "#F8991D",
+                                                    "#B87333","#b2bb1b")) +
+              labs(x = "Catchphrase", y = "Count", 
+                   title = "Overall catchphrase count") +
+              theme_minimal()
+          }
+          else{
+            catchphrase_df |> filter(series_name == input$series_select) |> 
+              filter(.data[[input$filtering_var]] == input$sub_filter_var) |>
+              group_by(catchphrase) |> summarise(count = sum(Count)) |>
+              ggplot(aes(x = catchphrase, y = count)) +
+              geom_col(position = "dodge", fill = c("#7c68ae", "#F8991D",
+                                                    "#B87333","#b2bb1b")) +
+              labs(x = "Catchphrase", y = "Count", 
+                   title = glue::glue("Catchphrase count for ",
+                                      input$series_select, " with  ",
+                                      input$sub_filter_var, " for the ",
+                                      input$filtering_var)) +
+              theme_minimal()
+          }
         }
       }
     }
@@ -745,27 +851,55 @@ server <- function(input, output, session){
   output$table <- renderDataTable({
     if(input$var_select == "Captured"){
       if(input$series_select == "none"){
-        if(filter_var == "none"){
-          captured_df |> mutate(Character = who) |> group_by(Character) |> 
-        summarise("Captured Count" = sum(captured_by))
+        if(input$filtering_var == "none"){
+          captured_df |> mutate(Character = who) |> group_by(Character) |>
+            summarise("Captured Count" = sum(captured_by))
         }
         else{
           captured_df |> filter(.data[[input$filtering_var]] == input$sub_filter_var) |>
             mutate(Character = who) |> group_by(Character) |> 
-        summarise("Captured Count" = sum(captured_by))
+            summarise("Captured Count" = sum(captured_by))
         }
       }
       else{
         if(input$filtering_var == "none"){
           captured_df |> filter(series_name == input$series_select) |>
-          mutate(Character = who) |> group_by(Character) |> 
-          summarise("Captured Count" = sum(captured_by))
-        }
+            mutate(Character = who) |> group_by(Character) |>
+            summarise("Captured Count" = sum(captured_by))
+        }        
         else{
           captured_df |> filter(series_name == input$series_select) |>
             filter(.data[[input$filtering_var]] == input$sub_filter_var) |>
-          mutate(Character = who) |> group_by(Character) |> 
-          summarise("Captured Count" = sum(captured_by))
+            mutate(Character = who) |> group_by(Character) |>
+            summarise("Captured Count" = sum(captured_by))
+        }
+      }
+    }
+    else{
+      if(input$var_select == "Catchphrase"){
+        if(input$series_select == "none"){
+          if(input$filtering_var == "none"){
+            catchphrase_df |> group_by(catchphrase) |>
+              summarise("Catchphrase Count" = sum(Count))
+          }
+          else{
+            catchphrase_df |> filter(.data[[input$filtering_var]] == input$sub_filter_var) |>
+              group_by(catchphrase) |> 
+              summarise("Catchphrase Count" = sum(Count))
+          }
+        }
+        else{
+          if(input$filtering_var == "none"){
+            catchphrase_df |> filter(series_name == input$series_select) |>
+              group_by(catchphrase) |>
+              summarise("Catchphrase Count" = sum(Count))
+          }        
+          else{
+            catchphrase_df |> filter(series_name == input$series_select) |>
+              filter(.data[[input$filtering_var]] == input$sub_filter_var) |>
+              group_by(catchphrase) |>
+              summarise("Catchphrase Count" = sum(Count))
+          }
         }
       }
     }

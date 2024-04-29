@@ -1,9 +1,6 @@
 ---
-title: "Final Project Write-Up"
-author: "Olivia Varricchione"
-format: 
-  html:
-    embed-resources: true
+title: "Final Project Slides"
+format: revealjs
 ---
 
 ```{r}
@@ -272,30 +269,30 @@ catchphrase_df <- df |> select(1:4, 32:35, 26:31, 36) |>
 library(plotly)
 ```
 
-**Abstract**
+## Data Introduction
 
-A Scooby-Doo dataset obtained from tidyTuesday was analyzed to look at which character catches, captures, unmasks, and snacks the most throughout all of the Scooby-Doo series. A shiny app was made to aid in the understanding of how these outcomes change based on certain characteristics of the investigations. It was found that throughout all of the Scooby-Doo series, Daphnie captures and snacks the most, Shaggy says his catchphrase, Zoinks, the most, Scooby catches the most, and Fred unmasks the most.
+* Scooby-Doo dataset from tidyTuesday
 
-**Introduction**
+* Goal: which characters catches, captures, unmasks, says their catchphrase, and snacks the most
 
-This analysis will be using the Scooby-Doo data set from tidyTuesday that can be found at this web address: https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-07-13/readme.md. The data set has 603 observations by accounting for all of the different Scooby-Doo series, including cross over episodes, and looks at 75 different variables. The main variables of interest include the series name and the caught, captured, unmasked, catchphrase and snack variables for the different characters. This analysis will focus on determining which character catches, captures, unmasks, says their catchphrase, and snacks the most throughout the Scooby-Doo series. Additionally, a shiny app was made to help determine how these numbers change when focusing on different characteristics of the investigation. The different characteristics include the culprit's gender, how many monsters there were, if the monster was real, what type of monster it was, how many total snacks were consumed, if the group split up during the investigation, and if there was trap work set up prior to catching the monster.
+* Made a shiny app to be able to filter by variable, series, and characteristics of the investigation
 
-**Visualizations**
-
-Captured:
+## Visualization 1: Snacks
 
 ```{r}
-captured_graph <- captured_df |> group_by(who) |> summarise(count = sum(captured_by))
-ggplot(data = captured_graph, aes(x = who, y = count)) +
+snacks_df |> group_by(who) |> summarise(count = sum(snacks)) |>
+  ggplot(aes(x = who, y = count)) +
   geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
                                         "#B87333","#b2bb1b", "#F8991D")) +
-  labs(title = "Captured Count by Character", x = "Character", y = "Count")
+  labs(title = "Snack count by character for What's New Scooby Doo") +
+  theme_minimal(base_size = 20)
 ```
 
-From this graph, we can see that Daphnie captures the most compared to the other characters throughout all of the Scooby-Doo series. However, it is fairly close amongst the characters, as no one captures dramatically less than any of the other characters.
+## Visualization 1: Snacks
 
 ```{r}
-captured_plot <- captured_df|> group_by(who, series_name) |> summarise(count = sum(captured_by)) |>
+snacks_plot <- snacks_df|> group_by(who, series_name) |> 
+  summarise(count = sum(snacks)) |>
   ggplot(aes(x = who, y = count, label = series_name)) +
   geom_jitter(width = 0.1, aes(color = who)) +
   scale_color_manual(values = c("daphnie" = "#7c68ae",
@@ -303,86 +300,13 @@ captured_plot <- captured_df|> group_by(who, series_name) |> summarise(count = s
                                 "scooby" = "#B87333",
                                 "shaggy" = "#b2bb1b",
                                 "velma" = "#F8991D")) +
-  theme_minimal() +
-  labs(title = "Captured Count by Character", x = "Character", y = "Count")
-ggplotly(captured_plot, tooltip = "label") |> style(showlegend = FALSE)
-```
-
-This graph allows up to see the variability among the capturing for each character for each series. We can see that each character has a fair amount of low numbers of captures for the season. Additionally, each of the characters has a high capture amount for Warner Home Video, either with it being the highest or second highest count for the character.
-
-Catchphrase:
-
-```{r}
-catchphrase_graph <- catchphrase_df |> group_by(catchphrase) |> 
-  summarise(count = sum(Count))
-ggplot(data = catchphrase_graph, aes(x = catchphrase, y = count)) +
-  geom_col(position = "dodge", fill = c("#7c68ae","#F8991D",
-                                        "#B87333","#b2bb1b")) +
-  labs(title = "Catchphrase Count", x = "Catchphrase", y = "Count")
-```
-
-From this graph, we can see that Shaggy says zoinks a lot more than any of the other characters says their catchphrase across all of the seasons. This is a little surprising, as I would have guessed that Scooby said rooby rooby roo the most, though that is the second lowest count.
-
-Caught:
-
-```{r}
-caught_graph <- caught_df |> group_by(who) |> summarise(count = sum(caught_by))
-ggplot(data = caught_graph, aes(x = who, y = count)) +
-  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black", "red",
-                                        "#B87333","#b2bb1b", "#F8991D")) +
-  labs(title = "Caught Count by Character", x = "Character", y = "Count")
-```
-
-This graph shows us that across all of the series, Scooby catches the culprit the most. I was surprised by how little Daphnie and Velma caught the culprit and how high the count for other was.
-
-```{r}
-caught_plot <- caught_df|> group_by(who, series_name) |> 
-  summarise(count = sum(caught_by)) |>
-  ggplot(aes(x = who, y = count, label = series_name)) +
-  geom_jitter(width = 0.1, aes(color = who)) +
-  scale_color_manual(values = c("daphnie" = "#7c68ae",
-                                "fred" = "#76a2ca",
-                                "not" = "black",
-                                "other" = "red",
-                                "scooby" = "#B87333",
-                                "shaggy" = "#b2bb1b",
-                                "velma" = "#F8991D")) +
-  theme_minimal() +
-  labs(title = "Caught Count by Character", x = "Character", y = "Count")
-ggplotly(caught_plot, tooltip = "label") |> style(showlegend = FALSE)
-
-```
-
-This graph shows us that Scooby catches a higher amount more consistantly than the other characters, and that it is not just one show where he has a high caught count that was bringing up the overall. We can see that it is Fred who actually has the highest caught count in one series: Scooby-Doo Mystery Incorporated. Additionally, we can see that in Shaggy & Scooby-Doo Get a Clue! there is a high amount of times that the culprit was not caught.
-
-Snacks:
-
-```{r}
-snacks_graph <- snacks_df |> group_by(who) |> summarise(count = sum(snacks))
-ggplot(data = snacks_graph, aes(x = who, y = count)) +
-  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
-                                        "#B87333","#b2bb1b", "#F8991D")) +
+  theme_minimal(base_size = 20) +
   labs(title = "Snack Count by Character", x = "Character", y = "Number of Snacks")
+ggplotly(snacks_plot, tooltip = "label") |> style(showlegend = FALSE)
 ```
 
-This visualization shows us that Daphnie has the most amount of episodes where she has a snack and Scooby has the lowest. This is very shocking to me, as I would have thought that Shaggy and Scooby would have a significantly higher amount of snacks compared to all of the other characters.
-
-Unmasked:
+## Visualization 2
 
 ```{r}
-unmasked_graph <- unmasked_df |> group_by(who) |> summarise(count = sum(unmasked))
-ggplot(data = unmasked_graph, aes(x = who, y = count)) +
-  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black",
-                                        "#B87333","#b2bb1b", "#F8991D")) +
-  labs(title = "Unmasked Count by Character", x = "Character", y = "Count")
+
 ```
-
-This graph shows us that Fred unmasks the culprit the most, with Velma having the second highest unmasking count across all of the series while Shaggy and Scooby have the lowest count for unmasking the culprit.
-
-**Conclusion**
-- summarize major findings
--describe future work that you would complete if you have more time --> maybe make a model trying to predict engagement or imbd based on the characteristics I looked at?
-- limitations in the visualizations --> in snack its true or false, doesn't take into account HOW MANY in that snack (cause then snack_number ranges from 1 to a few boxes to a whole wheel barrel full)
-
-UPDATE THE README!!!!!!
-README (10 points). You should update your repository’s README page. To do so, imagine that someone has just two minutes to look at your project. What you would want to show for just two minutes should appear in the README file.

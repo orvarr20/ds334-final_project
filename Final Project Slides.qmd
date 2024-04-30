@@ -284,29 +284,39 @@ snacks_df |> group_by(who) |> summarise(count = sum(snacks)) |>
   ggplot(aes(x = who, y = count)) +
   geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
                                         "#B87333","#b2bb1b", "#F8991D")) +
-  labs(title = "Snack count by character for What's New Scooby Doo") +
+  labs(title = "Snack count by character") +
   theme_minimal(base_size = 20)
 ```
 
 ## Visualization 1: Snacks
 
 ```{r}
-snacks_plot <- snacks_df|> group_by(who, series_name) |> 
-  summarise(count = sum(snacks)) |>
-  ggplot(aes(x = who, y = count, label = series_name)) +
-  geom_jitter(width = 0.1, aes(color = who)) +
-  scale_color_manual(values = c("daphnie" = "#7c68ae",
-                                "fred" = "#76a2ca",
-                                "scooby" = "#B87333",
-                                "shaggy" = "#b2bb1b",
-                                "velma" = "#F8991D")) +
-  theme_minimal(base_size = 20) +
-  labs(title = "Snack Count by Character", x = "Character", y = "Number of Snacks")
-ggplotly(snacks_plot, tooltip = "label") |> style(showlegend = FALSE)
+snacks_df |> filter(monster_real == TRUE) |> 
+  group_by(who) |> summarise(count = sum(snacks)) |>
+  ggplot(aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                        "#B87333","#b2bb1b", "#F8991D")) +
+  labs(title = "Snack count by character when the monster is real") +
+  theme_minimal(base_size = 20)
 ```
 
 ## Visualization 2
 
 ```{r}
+unmasked_df |> group_by(who) |> summarise(count = sum(unmasked)) |> 
+ggplot(aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black",
+                                        "#B87333","#b2bb1b", "#F8991D")) +
+  labs(title = "Unmasked Count by Character", x = "Character", y = "Count")
+```
 
+## Visualization 2
+
+```{r}
+unmasked_df |> filter(trap_work_first == "No") |>
+  group_by(who) |> summarise(count = sum(unmasked)) |> 
+ggplot(aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black",
+                                        "#B87333","#b2bb1b", "#F8991D")) +
+  labs(title = "Unmasked Count by Character when there is not trap work first", x = "Character", y = "Count")
 ```

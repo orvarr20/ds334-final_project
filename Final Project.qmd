@@ -1,16 +1,13 @@
 ---
-title: "Final Project"
+title: "Final Project App"
 author: "Olivia Varricchione"
 format: 
   html:
     embed-resources: true
 ---
 
-goal: shiny app that compares caught, captured, and unmasked, for each character throughout the seasons (and color the graph based on that charcater's colors and maybe includes a table of the list of episodes for each character)
-- will be able to filter for several monster attributes and strategies(type, real, culprit gender, trap work first, and if they split up)
-also compared the number of catchphrases (jeepers, jinkies, zoinks, and roobyroobyroo) for the seasons
-
 ```{r}
+## data cleaning
 library(tidyverse)
 scoobydoo <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-13/scoobydoo.csv')
 df <- scoobydoo |> select(2, 5, 13, 16, 18:41, 48, 54, 55, 58, 59, 62, 65, 17)
@@ -152,12 +149,7 @@ df <- df |> mutate(split_up = fct_recode(split_up, No = "0", Yes = "1", Yes = "2
                                              "2" = c("2", "a couple"),
                                              "3" = c("3", "several"),
                                              "3 boxes" = c("3 boxes", "several boxes")))
-```
 
-Data cleaning and baseline graph for each:
-
-caught
-```{r}
 caught_df <- df |> select(1, 2, 3, 4, 5, 6, 7, 8 , 9, 26, 27, 28, 29, 30, 31, 36) |> 
   mutate(caught_fred = as.factor(caught_fred)) |>
   mutate(caught_fred = if_else(caught_fred == "TRUE",
@@ -191,16 +183,6 @@ caught_df <- df |> select(1, 2, 3, 4, 5, 6, 7, 8 , 9, 26, 27, 28, 29, 30, 31, 36
   separate(col = who, into = c("caught", "who"), sep = "_") |>
   mutate(caught_by = if_else(caught_by!=0, 1, 0))
 
-#Example graph: count of each character captured in What's New Scooby-Doo
-caught_df |> filter(series_name == "What's New Scooby-Doo?") |>
-  group_by(who) |> summarise(count = sum(caught_by)) |>
-  ggplot(aes(x = who, y = count)) +
-  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black", "red",
-                                        "#B87333","#b2bb1b", "#F8991D")) +
-  labs(title = "Caught count by character for What's New Scooby Doo")
-```
-captured
-```{r}
 captured_df <- df |> select(1:4, 10:14, 26:31, 36) |> 
   mutate(captured_fred = as.factor(captured_fred)) |>
   mutate(captured_fred = if_else(captured_fred == "TRUE",
@@ -226,16 +208,6 @@ captured_df <- df |> select(1:4, 10:14, 26:31, 36) |>
   separate(col = who, into = c("captured", "who"), sep = "_") |>
   mutate(captured_by = if_else(captured_by!=0, 1, 0))
 
-##example graph for captured count
-captured_df |> filter(series_name == "What's New Scooby-Doo?") |>
-  group_by(who) |> summarise(count = sum(captured_by)) |>
-  ggplot(aes(x = who, y = count)) +
-  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
-                                        "#B87333","#b2bb1b", "#F8991D")) +
-  labs(title = "Captured count by character for What's New Scooby Doo")
-```
-unmasked
-```{r}
 unmasked_df <- df |> select(1:4, 15:19, 25:31, 36) |> 
   mutate(unmask_fred = as.factor(unmask_fred)) |>
   mutate(unmask_fred = if_else(unmask_fred == "TRUE",
@@ -265,16 +237,6 @@ unmasked_df <- df |> select(1:4, 15:19, 25:31, 36) |>
   separate(col = who, into = c("unmasked_by", "who"), sep = "_") |>
   mutate(unmasked = if_else(unmasked!=0, 1, 0))
 
-#Example graph for unmasked count
-unmasked_df |> filter(series_name == "What's New Scooby-Doo?") |>
-  group_by(who) |> summarise(count = sum(unmasked)) |>
-  ggplot(aes(x = who, y = count)) +
-  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black",
-                                        "#B87333", "#b2bb1b","#F8991D")) +
-  labs(title = "Unmasked count by character for What's New Scooby Doo")
-```
-snack
-```{r}
 snacks_df <- df |> select(1:4, 20:24, 26:31, 36) |> 
   mutate(snack_fred = as.factor(snack_fred)) |>
   mutate(snack_fred = if_else(snack_fred == "TRUE",
@@ -300,45 +262,15 @@ snacks_df <- df |> select(1:4, 20:24, 26:31, 36) |>
   separate(col = who, into = c("snack", "who"), sep = "_") |>
   mutate(snacks = if_else(snacks!=0, 1, 0))
 
-#Example graph: count of each character snack in What's New Scooby-Doo
-snacks_df |> filter(series_name == "What's New Scooby-Doo?") |>
-  group_by(who) |> summarise(count = sum(snacks)) |>
-  ggplot(aes(x = who, y = count)) +
-  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
-                                        "#B87333","#b2bb1b", "#F8991D")) +
-  labs(title = "Snack count by character for What's New Scooby Doo")
-
-snacks_df |> filter(series_name == "A Pup Named Scooby-Doo") |>
-  group_by(who) |> summarise(count = sum(snacks)) |>
-  ggplot(aes(x = who, y = count)) +
-  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
-                                        "#B87333","#b2bb1b", "#F8991D"))
-```
-
-catch phrases
-```{r}
 catchphrase_df <- df |> select(1:4, 32:35, 26:31, 36) |>
   pivot_longer(cols = (5:8), names_to = "catchphrase", values_to = "Count") |>
   mutate(Count = as.factor(Count)) |>
   mutate(Count = fct_recode(Count, "0" = "NULL")) |>
   mutate(Count = as.numeric(as.character(Count))) 
-
-
-#Example graph for catchphrases in What's New Scooby-Doo
-catchphrase_df |> filter(series_name == "What's New Scooby-Doo?") |>
-  group_by(catchphrase) |> summarise(count = sum(Count)) |>
-  ggplot(aes(x = catchphrase, y = count)) +
-  geom_col(position = "dodge", fill = c("#7c68ae", "#F8991D", "#B87333", "#b2bb1b")) +
-  labs(title = "Catchphrase count for What's New Scooby Doo")
-
-catchphrase_df |> filter(series_name == "A Pup Named Scooby-Doo") |> group_by(catchphrase) |> summarise(count = sum(Count)) |>
-  ggplot(aes(x = catchphrase, y = count)) +
-  geom_col(position = "dodge", fill = c("#7c68ae", "#F8991D", "#B87333", "#b2bb1b")) +
-  labs(title = "Catchphrase count for What's New Scooby Doo")
 ```
 
-App
 ```{r}
+## app
 library(shiny)
 
 series_vec <- catchphrase_df |> 
@@ -898,15 +830,9 @@ server <- function(input, output, session){
 shinyApp(ui, server)
 ```
 
-Homework:
-- look through shiny app for anything interesting when filtering by investigation characteristics (but not by series) --> monster_type, number of snacks
-- update slides for Wednesday with anything interesting that was found with filtering
-- finish the write-up by adding anything interesting that was found when filtering
-- need to put shiny app in a different link
-
 Wednesday class:
 - make updated blog post
--relook over everything, make sure everything is working, submit
+-relook over/reread everything and submit
 
 To turn in:
 - a link to your GitHub repository for the project.

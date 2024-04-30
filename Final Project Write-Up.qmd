@@ -310,6 +310,17 @@ ggplotly(captured_plot, tooltip = "label") |> style(showlegend = FALSE)
 
 This graph allows up to see the variability among the capturing for each character for each series. We can see that each character has a fair amount of low numbers of captures for the season. Additionally, each of the characters has a high capture amount for Warner Home Video, either with it being the highest or second highest count for the character.
 
+```{r}
+captured_graph <- captured_df |> filter(monster_type == "Super-Villain") |>
+  group_by(who) |> summarise(count = sum(captured_by))
+ggplot(data = captured_graph, aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                        "#B87333","#b2bb1b", "#F8991D")) +
+  labs(title = "Captured Count by Character with Super-Villain for the monster type", x = "Character", y = "Count")
+```
+
+From this graph we can see that there is a change when the monster is a super-villain. Scooby captures the most when the monster is a super-villain, and Daphnie is now tied for the least amount of captures.
+
 Catchphrase:
 
 ```{r}
@@ -322,6 +333,18 @@ ggplot(data = catchphrase_graph, aes(x = catchphrase, y = count)) +
 ```
 
 From this graph, we can see that Shaggy says zoinks a lot more than any of the other characters says their catchphrase across all of the seasons. This is a little surprising, as I would have guessed that Scooby said rooby rooby roo the most, though that is the second lowest count.
+
+```{r}
+catchphrase_graph <- catchphrase_df |> filter(number_of_snacks == "truck load") |>
+  group_by(catchphrase) |> 
+  summarise(count = sum(Count))
+ggplot(data = catchphrase_graph, aes(x = catchphrase, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae","#F8991D",
+                                        "#B87333","#b2bb1b")) +
+  labs(title = "Catchphrase Count with a truck load for the total number of snacks", x = "Catchphrase", y = "Count")
+```
+
+From this visualization we can see that when there is a whole truckload of snacks eaten, Velma says her catchphrase more often, though not by much.
 
 Caught:
 
@@ -355,6 +378,28 @@ ggplotly(caught_plot, tooltip = "label") |> style(showlegend = FALSE)
 
 This graph shows us that Scooby catches a higher amount more consistantly than the other characters, and that it is not just one show where he has a high caught count that was bringing up the overall. We can see that it is Fred who actually has the highest caught count in one series: Scooby-Doo Mystery Incorporated. Additionally, we can see that in Shaggy & Scooby-Doo Get a Clue! there is a high amount of times that the culprit was not caught.
 
+```{r}
+caught_graph <- caught_df |> filter(monster_real == "TRUE") |>
+  group_by(who) |> summarise(count = sum(caught_by))
+ggplot(data = caught_graph, aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black", "red",
+                                        "#B87333","#b2bb1b", "#F8991D")) +
+  labs(title = "Caught Count by Character for a real monster", x = "Character", y = "Count")
+```
+
+This visualization shows us that when the monster is real, it is a lot more likely to not be caught. Although, Scooby is still the most likely to catch it out of al of the characters.
+
+```{r}
+caught_graph <- caught_df |> filter(trap_work_first == "Yes") |>
+  group_by(who) |> summarise(count = sum(caught_by))
+ggplot(data = caught_graph, aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black", "red",
+                                        "#B87333","#b2bb1b", "#F8991D")) +
+  labs(title = "Caught Count by Character with trap work first", x = "Character", y = "Count")
+```
+
+Finally, we see that when there is a trap set up before catching the monster, Fred is now much more likely to be the one to catch the monster.
+
 Snacks:
 
 ```{r}
@@ -366,6 +411,17 @@ ggplot(data = snacks_graph, aes(x = who, y = count)) +
 ```
 
 This visualization shows us that Daphnie has the most amount of episodes where she has a snack and Scooby has the lowest. This is very shocking to me, as I would have thought that Shaggy and Scooby would have a significantly higher amount of snacks compared to all of the other characters.
+
+```{r}
+snacks_graph <- snacks_df |> filter(monster_real == "TRUE") |>
+  group_by(who) |> summarise(count = sum(snacks))
+ggplot(data = snacks_graph, aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca",
+                                        "#B87333","#b2bb1b", "#F8991D")) +
+  labs(title = "Snack Count by Character when the monster is real", x = "Character", y = "Number of Snacks")
+```
+
+This graph shows us that when the monster is real, Daphnie snacks a lot less and Shaggy snacks a lot more.
 
 Unmasked:
 
@@ -379,10 +435,21 @@ ggplot(data = unmasked_graph, aes(x = who, y = count)) +
 
 This graph shows us that Fred unmasks the culprit the most, with Velma having the second highest unmasking count across all of the series while Shaggy and Scooby have the lowest count for unmasking the culprit.
 
-**Conclusion**
-- summarize major findings
--describe future work that you would complete if you have more time --> maybe make a model trying to predict engagement or imbd based on the characteristics I looked at?
-- limitations in the visualizations --> in snack its true or false, doesn't take into account HOW MANY in that snack (cause then snack_number ranges from 1 to a few boxes to a whole wheel barrel full)
+```{r}
+unmasked_graph <- unmasked_df |> filter(trap_work_first == "No") |>
+  group_by(who) |> summarise(count = sum(unmasked))
+ggplot(data = unmasked_graph, aes(x = who, y = count)) +
+  geom_col(position = "dodge", fill = c("#7c68ae", "#76a2ca", "black",
+                                        "#B87333","#b2bb1b", "#F8991D")) +
+  labs(title = "Unmasked Count by Character when there is not trap work first", x = "Character", y = "Count")
+```
 
-UPDATE THE README!!!!!!
-README (10 points). You should update your repository’s README page. To do so, imagine that someone has just two minutes to look at your project. What you would want to show for just two minutes should appear in the README file.
+This graph shows us that when there is not trap work first, Velma is the one who unmasks the monster the most. This is interesting since we had previously seen that Fred is most likely to capture the monster if there is trap work first, meaning that he is unmasking more when he catches them with his trap work than when there is not trap work.
+
+**Conclusion**
+
+From this analysis, we have seen taht Daphnie captures the most, but when the monster is a supper-villain it is scooby that captures the most. When looking at the catchphrases, we saw that Shaggy says zoinks the most, but when more snacks are eaten (a whole truck load), Velma says Jinkies more. We also saw taht Scooby catches the culprit the most, however when the monster is real it is more likely to not be caught and when a trap is set up first, Fred is more likely to catch the monster. Additionally, Daphnie snacks most consistently, but when the monster is real Shaggy snacks a lot more. Finally, Fred unmasks the monster the most, but when there is not trap work Velma unmasks the culprit more often.
+
+It is important to note that there is a limitation when looking at who snacks the most. The variable for snacking is a simple boolean variable of whether or not the character snacks in that episode. It does not take into account how many snacks that individual character consumed that episode, and there is a wide range of snacks ranging from 1 to a truck load to a lifetime supply which significantly impacts the comparison ability for the snacking habits of the characters.
+
+With more time for analysis, it would be interesting to predict either the engagement or imbd rating based on characteristics of the episodes, focusing on the ones I looked at to see if who unmasks or catches the monster, etc. impacts the rating and engagement of that episode. 

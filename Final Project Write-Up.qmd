@@ -269,12 +269,11 @@ catchphrase_df <- df |> select(1:4, 32:35, 26:31, 36) |>
   mutate(Count = as.factor(Count)) |>
   mutate(Count = fct_recode(Count, "0" = "NULL")) |>
   mutate(Count = as.numeric(as.character(Count))) 
-library(plotly)
 ```
 
 **Abstract**
 
-A Scooby-Doo dataset obtained from tidyTuesday was analyzed to look at which character catches, captures, unmasks, and snacks the most throughout all of the Scooby-Doo series. A shiny app was made to aid in the understanding of how these outcomes change based on certain characteristics of the investigations. It was found that throughout all of the Scooby-Doo series, Daphnie captures and snacks the most, Shaggy says his catchphrase, Zoinks, the most, Scooby catches the most, and Fred unmasks the most.
+A Scooby-Doo data set obtained from tidyTuesday was analyzed to look at which character catches, captures, unmasks, and snacks the most throughout all of the Scooby-Doo series. A shiny app was made to aid in the understanding of how these outcomes change based on certain characteristics of the investigations. It was found that throughout all of the Scooby-Doo series, Daphnie captures and snacks the most, Shaggy says his catchphrase, Zoinks, the most, Scooby catches the most, and Fred unmasks the most.
 
 **Introduction**
 
@@ -292,23 +291,7 @@ ggplot(data = captured_graph, aes(x = who, y = count)) +
   labs(title = "Captured Count by Character", x = "Character", y = "Count")
 ```
 
-From this graph, we can see that Daphnie captures the most compared to the other characters throughout all of the Scooby-Doo series. However, it is fairly close amongst the characters, as no one captures dramatically less than any of the other characters.
-
-```{r}
-captured_plot <- captured_df|> group_by(who, series_name) |> summarise(count = sum(captured_by)) |>
-  ggplot(aes(x = who, y = count, label = series_name)) +
-  geom_jitter(width = 0.1, aes(color = who)) +
-  scale_color_manual(values = c("daphnie" = "#7c68ae",
-                                "fred" = "#76a2ca",
-                                "scooby" = "#B87333",
-                                "shaggy" = "#b2bb1b",
-                                "velma" = "#F8991D")) +
-  theme_minimal() +
-  labs(title = "Captured Count by Character", x = "Character", y = "Count")
-ggplotly(captured_plot, tooltip = "label") |> style(showlegend = FALSE)
-```
-
-This graph allows up to see the variability among the capturing for each character for each series. We can see that each character has a fair amount of low numbers of captures for the season. Additionally, each of the characters has a high capture amount for Warner Home Video, either with it being the highest or second highest count for the character.
+From this graph, we can see that Daphnie captures the most compared to the other characters throughout all of the Scooby-Doo series. However, it is fairly close amongst the characters, as no one captures dramatically less than any of the other characters. However, using the app, when we filter for the different monster_types, we see that this changes.
 
 ```{r}
 captured_graph <- captured_df |> filter(monster_type == "Super-Villain") |>
@@ -344,7 +327,7 @@ ggplot(data = catchphrase_graph, aes(x = catchphrase, y = count)) +
   labs(title = "Catchphrase Count with a truck load for the total number of snacks", x = "Catchphrase", y = "Count")
 ```
 
-From this visualization we can see that when there is a whole truckload of snacks eaten, Velma says her catchphrase more often, though not by much.
+Using the app to obtain this visualization, we can see that when there is a whole truckload of snacks eaten, Velma says her catchphrase more often, though not by much.
 
 Caught:
 
@@ -356,27 +339,7 @@ ggplot(data = caught_graph, aes(x = who, y = count)) +
   labs(title = "Caught Count by Character", x = "Character", y = "Count")
 ```
 
-This graph shows us that across all of the series, Scooby catches the culprit the most. I was surprised by how little Daphnie and Velma caught the culprit and how high the count for other was.
-
-```{r}
-caught_plot <- caught_df|> group_by(who, series_name) |> 
-  summarise(count = sum(caught_by)) |>
-  ggplot(aes(x = who, y = count, label = series_name)) +
-  geom_jitter(width = 0.1, aes(color = who)) +
-  scale_color_manual(values = c("daphnie" = "#7c68ae",
-                                "fred" = "#76a2ca",
-                                "not" = "black",
-                                "other" = "red",
-                                "scooby" = "#B87333",
-                                "shaggy" = "#b2bb1b",
-                                "velma" = "#F8991D")) +
-  theme_minimal() +
-  labs(title = "Caught Count by Character", x = "Character", y = "Count")
-ggplotly(caught_plot, tooltip = "label") |> style(showlegend = FALSE)
-
-```
-
-This graph shows us that Scooby catches a higher amount more consistantly than the other characters, and that it is not just one show where he has a high caught count that was bringing up the overall. We can see that it is Fred who actually has the highest caught count in one series: Scooby-Doo Mystery Incorporated. Additionally, we can see that in Shaggy & Scooby-Doo Get a Clue! there is a high amount of times that the culprit was not caught.
+This graph shows us that across all of the series, Scooby catches the culprit the most. I was surprised by how little Daphnie and Velma caught the culprit and how high the count for "other" was.
 
 ```{r}
 caught_graph <- caught_df |> filter(monster_real == "TRUE") |>
@@ -387,7 +350,7 @@ ggplot(data = caught_graph, aes(x = who, y = count)) +
   labs(title = "Caught Count by Character for a real monster", x = "Character", y = "Count")
 ```
 
-This visualization shows us that when the monster is real, it is a lot more likely to not be caught. Although, Scooby is still the most likely to catch it out of al of the characters.
+When looking through the shiny app, this changed depending on whether or not the monster was real. When the monster is real, it is a lot more likely to not be caught. Although, Scooby is still the most likely to catch it out of al of the characters.
 
 ```{r}
 caught_graph <- caught_df |> filter(trap_work_first == "Yes") |>
@@ -398,7 +361,7 @@ ggplot(data = caught_graph, aes(x = who, y = count)) +
   labs(title = "Caught Count by Character with trap work first", x = "Character", y = "Count")
 ```
 
-Finally, we see that when there is a trap set up before catching the monster, Fred is now much more likely to be the one to catch the monster.
+Additionally, if we look at if there was a trap set up before catching the monster, we see that Fred is now much more likely to be the one to catch the monster.
 
 Snacks:
 

@@ -1,5 +1,5 @@
 ---
-title: "Final Project App"
+title: "Shiny App"
 author: "Olivia Varricchione"
 format: 
   html:
@@ -829,13 +829,3 @@ server <- function(input, output, session){
 
 shinyApp(ui, server)
 ```
-
-Wednesday class:
-- make updated blog post
--relook over/reread everything and submit
-
-To turn in:
-- a link to your GitHub repository for the project.
-- a written report (in Quarto), embedded with the visualizations you have constructed and the code used to construct these visualizations.
-- a link to the script creating a Shiny app.
-- a link to your blog with an updated blog post on your final project.
